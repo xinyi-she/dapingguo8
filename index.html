@@ -80,6 +80,7 @@
     transform-origin:left center;
   }
   #score.bump{transform:scale(1.22);}
+  #score.neg{background:linear-gradient(180deg,#9aa2b1,#5c6270);-webkit-background-clip:text;background-clip:text;}
   .best{margin-left:auto; font-size:12px; color:var(--ink2);}
   .best b{color:#d9503f; font-size:14px; font-variant-numeric:tabular-nums;}
   .nextCard{display:flex; align-items:center; gap:12px;}
@@ -119,6 +120,71 @@
     background:linear-gradient(180deg,#ff8a6a,#e8443f);
     color:#fff; box-shadow:0 14px 26px -12px rgba(214,62,56,.85), 0 1px 0 rgba(255,255,255,.4) inset;
   }
+  /* ---------- 抽奖 / 奖牌 / buff ---------- */
+  .buffs{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;flex-basis:100%;}
+  .buffChip{
+    display:inline-flex;align-items:center;gap:3px;
+    font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;
+    background:rgba(255,255,255,.85);border:1px solid rgba(190,140,100,.25);color:#8a5a38;
+  }
+  .buffChip.good{background:linear-gradient(180deg,#fffbe8,#fff0c2);color:#b07b16;border-color:#f2d68a;}
+  .buffChip.bad{background:linear-gradient(180deg,#f1f2f6,#e4e7ef);color:#5e6478;border-color:#ccd2df;}
+  .buffChip.bird{background:linear-gradient(180deg,#eaf6ff,#d6ecff);color:#2f7fa8;border-color:#b7dcf5;}
+  .gachaCard{padding:11px 12px 12px;display:flex;flex-direction:column;gap:9px;}
+  .gachaBtn{
+    display:flex;align-items:center;gap:8px;
+    padding:12px 12px;border-radius:15px;border:none;cursor:pointer;
+    font-family:inherit;font-size:15px;font-weight:800;color:#fff;
+    background:linear-gradient(135deg,#ff9a4c,#f43f5e 55%,#c026d3);
+    box-shadow:0 12px 22px -12px rgba(220,60,120,.85), 0 1px 0 rgba(255,255,255,.35) inset;
+    transition:transform .12s, filter .15s;
+  }
+  .gachaBtn:hover{filter:brightness(1.06);}
+  .gachaBtn:active{transform:translateY(2px) scale(.99);}
+  .gachaBtn:disabled{background:linear-gradient(135deg,#cfc8c2,#b8b1ab);box-shadow:none;cursor:not-allowed;}
+  .gachaBtn .g-cost{margin-left:auto;font-size:12px;font-weight:800;padding:2px 8px;border-radius:999px;background:rgba(0,0,0,.2);}
+  .medalRow{display:flex;gap:6px;}
+  .medalBtn{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;
+    padding:7px 4px;border-radius:12px;border:1px solid rgba(255,255,255,.9);
+    background:linear-gradient(180deg,#fffdf7,#fff4e2);
+    box-shadow:0 6px 12px -9px rgba(150,110,50,.8);
+    cursor:pointer;font-family:inherit;transition:transform .12s;
+  }
+  .medalBtn:active{transform:translateY(2px);}
+  .medalBtn .mi{font-size:16px;line-height:1;}
+  .medalBtn b{font-size:13px;color:#8a5a38;}
+  .medalBtn i{font-size:9.5px;font-style:normal;color:#b08a6a;letter-spacing:.3px;white-space:nowrap;}
+  .medalBtn:disabled{opacity:.45;cursor:not-allowed;}
+  /* ---------- 抽奖弹窗 ---------- */
+  .gachaMask{
+    position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+    background:rgba(58,30,22,.44);backdrop-filter:blur(7px);
+    opacity:0;pointer-events:none;transition:opacity .28s;
+  }
+  .gachaMask.show{opacity:1;pointer-events:auto;}
+  .gCard{
+    width:min(340px,86vw);padding:24px 22px 20px;text-align:center;
+    background:linear-gradient(180deg,#fffdf8,#fff2e2);
+    border-radius:28px;border:1px solid #fff;
+    box-shadow:0 34px 70px -26px rgba(80,40,20,.65);
+    transform:translateY(16px) scale(.92);transition:transform .4s cubic-bezier(.2,1.6,.4,1);
+  }
+  .gachaMask.show .gCard{transform:none;}
+  .gTag{font-size:11px;letter-spacing:6px;color:#b08a6a;}
+  .gName{
+    font-size:58px;font-weight:900;line-height:1.05;margin:4px 0 0;
+    background:linear-gradient(180deg,#ffb04a,#f43f5e);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .gName.rolling{background:none;-webkit-text-fill-color:#cbb9a9;color:#cbb9a9;opacity:.75;}
+  .gName.pop{animation:gpop .5s cubic-bezier(.2,1.7,.4,1);}
+  @keyframes gpop{0%{transform:scale(.45);opacity:.3}62%{transform:scale(1.18)}100%{transform:scale(1)}}
+  .gSub{font-size:14px;font-weight:800;color:#7a4a2e;margin-top:4px;min-height:20px;}
+  .gDesc{font-size:12.5px;color:#98785f;line-height:1.75;margin:8px 0 0;min-height:44px;}
+  .gMedal{margin-top:8px;font-size:14px;font-weight:800;color:#b07b16;line-height:1.7;min-height:20px;}
+  .gCard button{margin-top:14px;width:100%;}
+
   /* ---------- overlay ---------- */
   .overlay{
     position:absolute; inset:0; border-radius:34px;
@@ -159,6 +225,11 @@
     .nextBox{width:40px;height:40px;border-radius:12px;}
     .nextBox img{width:34px;height:34px;}
     .chainCard{display:none;}
+    .gachaCard{flex:1 1 100%;width:100%;flex-direction:row;align-items:center;gap:8px;}
+    .gachaBtn{flex:1 1 auto;padding:10px 12px;font-size:14px;}
+    .medalRow{flex:0 0 auto;gap:5px;}
+    .medalBtn{padding:5px 7px;}
+    .medalBtn i{white-space:nowrap;font-size:9px;}
     .actions{width:100%;}
     .best{margin-left:0;}
   }
@@ -193,6 +264,7 @@
       <span class="label">得分</span>
       <strong id="score">0</strong>
       <span class="best">最高 <b id="best">0</b></span>
+      <div class="buffs" id="buffs"></div>
     </div>
 
     <div class="card nextCard">
@@ -209,11 +281,39 @@
       <div class="chain" id="chain"></div>
     </div>
 
+    <div class="card gachaCard">
+      <button class="gachaBtn" id="btnGacha">
+        <span>🎰</span><span>抽奖</span><span class="g-cost" id="gachaCost">2000</span>
+      </button>
+      <div class="medalRow">
+        <button class="medalBtn" id="mGoldBtn" title="金牌兑换 300,000 分">
+          <span class="mi">🥇</span><b id="mGold">0</b><i>兑30万</i>
+        </button>
+        <button class="medalBtn" id="mSilverBtn" title="银牌兑换 100,000 分">
+          <span class="mi">🥈</span><b id="mSilver">0</b><i>兑10万</i>
+        </button>
+        <button class="medalBtn" id="mBronzeBtn" title="铜牌兑换 50,000 分">
+          <span class="mi">🥉</span><b id="mBronze">0</b><i>兑5万</i>
+        </button>
+      </div>
+    </div>
+
     <div class="actions">
       <button id="btnSound">🔊 音效</button>
       <button id="btnRestart">重新开始</button>
     </div>
   </aside>
+</div>
+
+<div class="gachaMask" id="gachaMask">
+  <div class="gCard">
+    <div class="gTag">抽 奖 结 果</div>
+    <div class="gName" id="gName">?</div>
+    <div class="gSub" id="gSub"></div>
+    <div class="gDesc" id="gDesc"></div>
+    <div class="gMedal" id="gMedal"></div>
+    <button class="primary" id="gOk">收下</button>
+  </div>
 </div>
 
 <script>
@@ -250,7 +350,7 @@ const SCORE = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
 /* =========================================================
    可爱苹果 SVG 生成器
    ========================================================= */
-function appleSVG(cfg, S){
+function appleSVG(cfg, S, mood){
   const R = S*RC, cx = S*0.5, cy = S*CYC;
   const [light, main, dark] = cfg.c;
   const leafA = cfg.leafA || '#8ce89a';
@@ -331,8 +431,7 @@ function appleSVG(cfg, S){
     C ${cx-R*1.07} ${cy+R*0.28}, ${cx-R*1.07} ${cy-R*0.18}, ${cx-R*0.94} ${cy-R*0.56}
     C ${cx-R*0.78} ${cy-R*0.96}, ${cx-R*0.30} ${cy-R*1.04}, ${cx} ${cy-R*0.72} Z`;
 
-  const eyeX = R*0.37, eyeY = cy - R*0.06;
-  const eyeR = R*0.205, pupR = R*0.125;
+  const eyeY = cy - R*0.06;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
   <defs>
@@ -383,23 +482,7 @@ function appleSVG(cfg, S){
   <ellipse cx="${cx+R*0.46}" cy="${cy-R*0.30}" rx="${R*0.13}" ry="${R*0.20}" fill="url(#hl)"
            transform="rotate(26 ${cx+R*0.46} ${cy-R*0.30})" opacity=".8"/>
 
-  <!-- 腮红 -->
-  <ellipse cx="${cx-R*0.62}" cy="${cy+R*0.24}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${cfg.blush}"/>
-  <ellipse cx="${cx+R*0.62}" cy="${cy+R*0.24}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${cfg.blush}"/>
-
-  <!-- 眼睛 -->
-  <ellipse cx="${cx-eyeX}" cy="${eyeY}" rx="${eyeR}" ry="${eyeR*1.12}" fill="#fff"/>
-  <ellipse cx="${cx+eyeX}" cy="${eyeY}" rx="${eyeR}" ry="${eyeR*1.12}" fill="#fff"/>
-  <circle cx="${cx-eyeX+R*0.012}" cy="${eyeY+R*0.022}" r="${pupR}" fill="${ink}"/>
-  <circle cx="${cx+eyeX+R*0.012}" cy="${eyeY+R*0.022}" r="${pupR}" fill="${ink}"/>
-  <circle cx="${cx-eyeX-R*0.048}" cy="${eyeY-R*0.048}" r="${pupR*0.36}" fill="#fff"/>
-  <circle cx="${cx+eyeX-R*0.048}" cy="${eyeY-R*0.048}" r="${pupR*0.36}" fill="#fff"/>
-  <circle cx="${cx-eyeX+R*0.062}" cy="${eyeY+R*0.082}" r="${pupR*0.20}" fill="#fff" opacity=".9"/>
-  <circle cx="${cx+eyeX+R*0.062}" cy="${eyeY+R*0.082}" r="${pupR*0.20}" fill="#fff" opacity=".9"/>
-
-  <!-- 嘴 -->
-  <path d="M ${cx-R*0.17} ${cy+R*0.30} Q ${cx} ${cy+R*0.50} ${cx+R*0.17} ${cy+R*0.30}"
-        stroke="${ink}" stroke-width="${R*0.06}" stroke-linecap="round" fill="none" opacity=".88"/>
+  ${faceSVG(cx, eyeY, R, ink, cfg.blush, 0.37, mood, 0.62)}
 
   ${front}
   </svg>`;
@@ -408,12 +491,52 @@ function appleSVG(cfg, S){
 /* =========================================================
    布丁 / 蛋糕 造型（与苹果同一套表情风格）
    ========================================================= */
-function faceSVG(cx, faceY, R, ink, blush, spread){
+function faceSVG(cx, faceY, R, ink, blush, spread, mood, blushX){
+  mood = mood || 'normal';
   const ex = R*(spread || 0.40);
+  const bx = R*(blushX || 0.73);
   const eyeR = R*0.20, pupR = R*0.122;
   let s = '';
-  s += `<ellipse cx="${cx-R*0.73}" cy="${faceY+R*0.28}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${blush}"/>`;
-  s += `<ellipse cx="${cx+R*0.73}" cy="${faceY+R*0.28}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${blush}"/>`;
+
+  /* ---------- 骄：弯眼笑 + 大咧嘴露牙（表情包风格） ---------- */
+  if (mood === 'proud'){
+    // 斜线腮红
+    s += `<ellipse cx="${cx-bx}" cy="${faceY+R*0.14}" rx="${R*0.23}" ry="${R*0.15}" fill="#ff5f7e" opacity=".40"/>`;
+    s += `<ellipse cx="${cx+bx}" cy="${faceY+R*0.14}" rx="${R*0.23}" ry="${R*0.15}" fill="#ff5f7e" opacity=".40"/>`;
+    s += `<path d="M ${cx-bx-R*0.11} ${faceY+R*0.24} L ${cx-bx+R*0.03} ${faceY+R*0.04}  M ${cx-bx-R*0.01} ${faceY+R*0.27} L ${cx-bx+R*0.13} ${faceY+R*0.07}"
+             stroke="#e8476a" stroke-width="${R*0.040}" stroke-linecap="round" opacity=".75"/>`;
+    s += `<path d="M ${cx+bx-R*0.03} ${faceY+R*0.24} L ${cx+bx+R*0.11} ${faceY+R*0.04}  M ${cx+bx-R*0.13} ${faceY+R*0.27} L ${cx+bx+R*0.01} ${faceY+R*0.07}"
+             stroke="#e8476a" stroke-width="${R*0.040}" stroke-linecap="round" opacity=".75"/>`;
+    // 弯弯笑眼
+    s += `<path d="M ${cx-ex-R*0.155} ${faceY+R*0.07} Q ${cx-ex} ${faceY-R*0.14} ${cx-ex+R*0.155} ${faceY+R*0.07}"
+             stroke="${ink}" stroke-width="${R*0.078}" fill="none" stroke-linecap="round"/>`;
+    s += `<path d="M ${cx+ex-R*0.155} ${faceY+R*0.07} Q ${cx+ex} ${faceY-R*0.14} ${cx+ex+R*0.155} ${faceY+R*0.07}"
+             stroke="${ink}" stroke-width="${R*0.078}" fill="none" stroke-linecap="round"/>`;
+    // 小眉毛
+    s += `<path d="M ${cx-ex-R*0.10} ${faceY-R*0.30} Q ${cx-ex} ${faceY-R*0.40} ${cx-ex+R*0.10} ${faceY-R*0.30}"
+             stroke="${ink}" stroke-width="${R*0.05}" fill="none" stroke-linecap="round"/>`;
+    s += `<path d="M ${cx+ex-R*0.10} ${faceY-R*0.30} Q ${cx+ex} ${faceY-R*0.40} ${cx+ex+R*0.10} ${faceY-R*0.30}"
+             stroke="${ink}" stroke-width="${R*0.05}" fill="none" stroke-linecap="round"/>`;
+    // 咧嘴大笑：平顶 + 圆弧底
+    const my = faceY + R*0.21, mw = R*0.58, mh = R*0.47;
+    const mouth = `M ${cx-mw} ${my} L ${cx+mw} ${my} Q ${cx+mw} ${my+mh} ${cx} ${my+mh} Q ${cx-mw} ${my+mh} ${cx-mw} ${my} Z`;
+    s += `<clipPath id="mclip"><path d="${mouth}"/></clipPath>`;
+    s += `<path d="${mouth}" fill="#fffdf3"/>`;
+    // 竖牙缝
+    s += `<g clip-path="url(#mclip)" stroke="${ink}" stroke-width="${R*0.032}" opacity=".75">`;
+    for (let k=-1; k<=1; k++){
+      const x = cx + k*mw*0.5;
+      s += `<line x1="${x}" y1="${my}" x2="${x}" y2="${my+mh}"/>`;
+    }
+    s += `</g>`;
+    // 嘴的外框
+    s += `<path d="${mouth}" fill="none" stroke="${ink}" stroke-width="${R*0.055}" stroke-linejoin="round"/>`;
+    return s;
+  }
+
+  /* ---------- 普通 / 哀：常规圆眼 ---------- */
+  s += `<ellipse cx="${cx-bx}" cy="${faceY+R*0.28}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${blush}"/>`;
+  s += `<ellipse cx="${cx+bx}" cy="${faceY+R*0.28}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${blush}"/>`;
   s += `<ellipse cx="${cx-ex}" cy="${faceY}" rx="${eyeR}" ry="${eyeR*1.12}" fill="#fff"/>`;
   s += `<ellipse cx="${cx+ex}" cy="${faceY}" rx="${eyeR}" ry="${eyeR*1.12}" fill="#fff"/>`;
   s += `<circle cx="${cx-ex+R*0.012}" cy="${faceY+R*0.022}" r="${pupR}" fill="${ink}"/>`;
@@ -422,12 +545,24 @@ function faceSVG(cx, faceY, R, ink, blush, spread){
   s += `<circle cx="${cx+ex-R*0.046}" cy="${faceY-R*0.046}" r="${pupR*0.36}" fill="#fff"/>`;
   s += `<circle cx="${cx-ex+R*0.060}" cy="${faceY+R*0.080}" r="${pupR*0.20}" fill="#fff" opacity=".9"/>`;
   s += `<circle cx="${cx+ex+R*0.060}" cy="${faceY+R*0.080}" r="${pupR*0.20}" fill="#fff" opacity=".9"/>`;
-  s += `<path d="M ${cx-R*0.16} ${faceY+R*0.38} Q ${cx} ${faceY+R*0.58} ${cx+R*0.16} ${faceY+R*0.38}"
+
+  if (mood === 'sad'){
+    s += `<path d="M ${cx-ex-R*0.14} ${faceY-R*0.24} Q ${cx-ex} ${faceY-R*0.30} ${cx-ex+R*0.13} ${faceY-R*0.37}"
+             stroke="${ink}" stroke-width="${R*0.045}" stroke-linecap="round" fill="none"/>`;
+    s += `<path d="M ${cx+ex+R*0.14} ${faceY-R*0.24} Q ${cx+ex} ${faceY-R*0.30} ${cx+ex-R*0.13} ${faceY-R*0.37}"
+             stroke="${ink}" stroke-width="${R*0.045}" stroke-linecap="round" fill="none"/>`;
+    s += `<path d="M ${cx-R*0.17} ${faceY+R*0.58} Q ${cx} ${faceY+R*0.34} ${cx+R*0.17} ${faceY+R*0.58}"
+             stroke="${ink}" stroke-width="${R*0.06}" stroke-linecap="round" fill="none" opacity=".9"/>`;
+    s += `<path d="M ${cx-ex+R*0.03} ${faceY+R*0.16} c ${-R*0.075} ${R*0.13} ${-R*0.075} ${R*0.20} 0 ${R*0.26} c ${R*0.075} ${-R*0.06} ${R*0.075} ${-R*0.13} 0 ${-R*0.26} Z" fill="#79c8f2" opacity=".95"/>`;
+    s += `<path d="M ${cx+ex+R*0.03} ${faceY+R*0.16} c ${-R*0.075} ${R*0.13} ${-R*0.075} ${R*0.20} 0 ${R*0.26} c ${R*0.075} ${-R*0.06} ${R*0.075} ${-R*0.13} 0 ${-R*0.26} Z" fill="#79c8f2" opacity=".95"/>`;
+  } else {
+    s += `<path d="M ${cx-R*0.16} ${faceY+R*0.38} Q ${cx} ${faceY+R*0.58} ${cx+R*0.16} ${faceY+R*0.38}"
         stroke="${ink}" stroke-width="${R*0.06}" stroke-linecap="round" fill="none" opacity=".88"/>`;
+  }
   return s;
 }
 
-function puddingSVG(cfg, S){
+function puddingSVG(cfg, S, mood){
   const R = S*RC, cx = S*0.5, cy = S*CYC;
   const [light, main, dark] = cfg.c;
   const ink = '#5d3726';
@@ -490,7 +625,7 @@ function puddingSVG(cfg, S){
              transform="rotate(-12 ${cx-R*0.60} ${cy+R*0.34})"/>
   </g>
 
-  ${faceSVG(cx, cy+R*0.26, R, ink, cfg.blush, 0.40)}
+  ${faceSVG(cx, cy+R*0.20, R, ink, cfg.blush, 0.40, mood, 0.73)}
 
   <!-- 顶上樱桃 -->
   <path d="M ${cx+R*0.03} ${cy-R*0.99} C ${cx+R*0.08} ${cy-R*1.14}, ${cx+R*0.16} ${cy-R*1.20}, ${cx+R*0.24} ${cy-R*1.23}"
@@ -500,7 +635,7 @@ function puddingSVG(cfg, S){
   </svg>`;
 }
 
-function cakeSVG(cfg, S){
+function cakeSVG(cfg, S, mood){
   const R = S*RC, cx = S*0.5, cy = S*CYC;
   const [light, main, dark] = cfg.c;
   const ink = '#5d3726';
@@ -572,14 +707,14 @@ function cakeSVG(cfg, S){
   <ellipse cx="${cx-R*0.14}" cy="${cy-R*1.04}" rx="${R*0.10}" ry="${R*0.045}" fill="#54b96c" transform="rotate(-22 ${cx-R*0.14} ${cy-R*1.04})"/>
   <ellipse cx="${cx+R*0.14}" cy="${cy-R*1.04}" rx="${R*0.10}" ry="${R*0.045}" fill="#54b96c" transform="rotate(22 ${cx+R*0.14} ${cy-R*1.04})"/>
 
-  ${faceSVG(cx, cy+R*0.24, R, ink, cfg.blush, 0.40)}
+  ${faceSVG(cx, cy+R*0.18, R, ink, cfg.blush, 0.40, mood, 0.73)}
   </svg>`;
 }
 
-function buildSVG(cfg, S){
-  if (cfg.kind === 'pudding') return puddingSVG(cfg, S);
-  if (cfg.kind === 'cake') return cakeSVG(cfg, S);
-  return appleSVG(cfg, S);
+function buildSVG(cfg, S, mood){
+  if (cfg.kind === 'pudding') return puddingSVG(cfg, S, mood);
+  if (cfg.kind === 'cake') return cakeSVG(cfg, S, mood);
+  return appleSVG(cfg, S, mood);
 }
 
 /* =========================================================
@@ -591,8 +726,29 @@ const DPR = Math.min(window.devicePixelRatio || 1, 2);
 cv.width = Math.round(W*DPR);
 cv.height = Math.round(H*DPR);
 
-const SPRITES = new Array(APPLES.length).fill(null);
+const MOODS = ['normal','proud','sad'];
+const SPRITE_SETS = { normal:[], proud:[], sad:[] };   // Image
+const DIM_SETS    = { normal:[], proud:[], sad:[] };   // 暗淡版 canvas
 const URIS = new Array(APPLES.length).fill('');
+const URI_SETS = { normal:[], proud:[], sad:[] };
+
+function spriteFor(level){
+  const dim = state.glowNet < 0;
+  const set = (dim ? DIM_SETS : SPRITE_SETS)[state.mood] || SPRITE_SETS.normal;
+  return (set && set[level]) || SPRITE_SETS.normal[level] || null;
+}
+function makeDim(img){
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth || SPR;
+  c.height = img.naturalHeight || SPR;
+  const g = c.getContext('2d');
+  g.drawImage(img, 0, 0);
+  g.globalCompositeOperation = 'source-atop';
+  g.fillStyle = 'rgba(40,34,52,0.26)';
+  g.fillRect(0,0,c.width,c.height);
+  g.globalCompositeOperation = 'source-over';
+  return c;
+}
 
 const state = {
   fruits: [], particles: [], texts: [],
@@ -600,7 +756,14 @@ const state = {
   current: 0, next: 1,
   cooldown: 0, overTimer: 0, gameOver: false,
   aimX: W/2, shake: 0, time: 0, drops: 0, maxLevel: 0,
-  muted: false
+  muted: false,
+  buffs: { win:0, lose:0, proud:0, sad:0, bird:0 },
+  medals: { gold:0, silver:0, bronze:0 },
+  rScale: 1, rCur: 1,
+  mood: 'normal',
+  glowNet: 0,
+  flash: null,
+  drawing: false
 };
 
 /* =========================================================
@@ -650,9 +813,12 @@ function tone(freq, freq2, dur, type, vol, delay){
 function sfx(kind, lv){
   if (state.muted) return;
   if (kind === 'merge'){
-    const f = 300 * Math.pow(1.14, lv||0);
-    tone(f, f*2.05, 0.20, 'sine', 0.20);
-    tone(f*1.5, f*2.6, 0.14, 'triangle', 0.09, 0.02);
+    let f = 300 * Math.pow(1.14, lv||0);
+    let dur = 0.20;
+    if (state.mood === 'proud'){ f *= 1.34; dur = 0.15; }
+    else if (state.mood === 'sad'){ f *= 0.72; dur = 0.30; }
+    tone(f, f*2.05, dur, 'sine', 0.20);
+    tone(f*1.5, f*2.6, dur*0.7, 'triangle', 0.09, 0.02);
   } else if (kind === 'big'){
     tone(180, 900, 0.42, 'triangle', 0.22);
     tone(320, 1400, 0.32, 'sine', 0.14, 0.05);
@@ -672,10 +838,11 @@ const SQ_K = 300, SQ_C = 8.5;
 function newFruit(x,y,level){
   const A = APPLES[level];
   return {
-    x, y, r:A.r, level,
+    x, y, r:A.r * state.rCur, level,
     vx:0, vy:0, angle:rnd(-0.18,0.18), av:rnd(-0.5,0.5),
     sq:0, vsq:0, sa:Math.PI/2,
     age:0, pop:0, over:0,
+    seed: Math.random(),
     tilt: A.tilt || 0.62
   };
 }
@@ -690,6 +857,14 @@ function squashHit(f, speed, axis){
 
 function stepPhysics(dt){
   const fs = state.fruits;
+
+  // 半径平滑过渡（抽到胜/败时）
+  if (Math.abs(state.rCur - state.rScale) > 0.0006){
+    const next = state.rCur + (state.rScale - state.rCur) * Math.min(1, 5*dt);
+    const ratio = next / state.rCur;
+    state.rCur = next;
+    for (let i=0;i<fs.length;i++) fs[i].r *= ratio;
+  }
 
   // 积分
   for (let i=0;i<fs.length;i++){
@@ -713,6 +888,19 @@ function stepPhysics(dt){
     if (f.sq < -0.18){ f.sq = -0.18; f.vsq *= 0.4; }
 
     if (f.pop > 0) f.pop = Math.max(0, f.pop - dt*4.5);
+
+    // 鸟类：小苹果长出翅膀，飞到上层乱窜
+    if (state.buffs.bird > 0 && f.level <= 2 && f.age > 0.5 && f.y > 130){
+      const pw = Math.min(2.2, state.buffs.bird);
+      const targetY = 290 + Math.sin(state.time*1.1 + f.seed*9) * 90;
+      f.vy -= G * dt * 0.985;                       // 翅膀抵消重力
+      f.vy += (targetY - f.y) * 3.4 * dt * pw;      // 飘向目标高度
+      f.vx += Math.sin(state.time*2.1 + f.seed*13) * 520 * dt * pw;
+      f.vy *= (1 - 2.2*dt);
+      f.vx *= (1 - 1.1*dt);
+      f.flapT = (f.flapT || 0) - dt;
+      if (f.flapT <= 0){ f.vy -= rnd(160, 300) * pw; f.flapT = rnd(0.3, 0.7); }
+    }
   }
 
   clampWalls(fs);
@@ -905,14 +1093,19 @@ function reset(){
   state.drops = 0;
   state.maxLevel = 0;
   state.shake = 0;
+  state.buffs = { win:0, lose:0, proud:0, sad:0, bird:0 };
+  state.rScale = 1; state.rCur = 1;
+  state.mood = 'normal';
+  state.glowNet = 0;
+  state.flash = null;
   document.getElementById('overlay').classList.remove('show');
   updateHud();
 }
 
 function dropApple(){
-  if (state.gameOver || state.cooldown > 0 || !SPRITES[state.current]) return;
+  if (state.gameOver || state.cooldown > 0 || !spriteFor(state.current)) return;
   const lv = state.current;
-  const r = APPLES[lv].r;
+  const r = APPLES[lv].r * state.rCur;
   const x = clamp(state.aimX, WALL_L + r + 2, WALL_R - r - 2);
   const f = newFruit(x, DROP_Y, lv);
   f.vy = 180;
@@ -1027,7 +1220,7 @@ const VIS = 0.962;      // 视觉半径 / 碰撞半径，留一点点缝，保�
 const MAX_SCALE = 1.038; // 形变后最大外扩：0.962×1.038 ≈ 0.999，始终不超出碰撞圆
 
 function drawSpriteRaw(x, y, r, level, sq, angle, sa, alpha, extraScale){
-  const img = SPRITES[level];
+  const img = spriteFor(level);
   const size = r * (1/HALFW) * VIS;
   const p = extraScale || 1;
   let sx = (1-sq)*p, sy = (1+sq)*p;
@@ -1053,8 +1246,43 @@ function drawSpriteRaw(x, y, r, level, sq, angle, sa, alpha, extraScale){
   ctx.restore();
 }
 
+function drawGlow(f){
+  const rr = f.r * 1.8;
+  const a = Math.min(0.55, 0.20 * state.glowNet);
+  const g = ctx.createRadialGradient(f.x, f.y, f.r*0.72, f.x, f.y, rr);
+  g.addColorStop(0, 'rgba(255,226,140,' + a + ')');
+  g.addColorStop(1, 'rgba(255,226,140,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(f.x, f.y, rr, 0, TAU);
+  ctx.fill();
+}
+
+function drawWings(f){
+  const flap = Math.sin(state.time*13 + f.seed*6.28);
+  ctx.save();
+  ctx.translate(f.x, f.y);
+  ctx.rotate(f.angle);
+  for (let side=-1; side<=1; side+=2){
+    ctx.save();
+    ctx.translate(side*f.r*0.72, -f.r*0.14);
+    ctx.rotate(side*(0.55 + 0.40*flap));
+    ctx.beginPath();
+    ctx.ellipse(0, -f.r*0.34, f.r*0.17, f.r*0.40, 0, 0, TAU);
+    ctx.fillStyle = 'rgba(255,255,255,.95)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(198,168,150,.6)';
+    ctx.lineWidth = Math.max(1, f.r*0.035);
+    ctx.stroke();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
 function drawFruit(f){
   const popScale = 1 + 0.16*f.pop;
+  if (state.glowNet > 0) drawGlow(f);
+  if (state.buffs.bird > 0) drawWings(f);
   drawSpriteRaw(f.x, f.y, f.r, f.level, f.sq, f.angle, f.sa, 1, popScale);
 }
 
@@ -1075,7 +1303,7 @@ function estimateLanding(x, r){
 function drawGuide(){
   if (state.gameOver) return;
   const lv = state.current;
-  const r = APPLES[lv].r;
+  const r = APPLES[lv].r * state.rCur;
   const x = clamp(state.aimX, WALL_L + r + 2, WALL_R - r - 2);
   const ready = state.cooldown <= 0;
   const alpha = ready ? 1 : clamp(1 - state.cooldown/0.40, 0, 1);
@@ -1174,6 +1402,14 @@ function render(){
 
   drawTexts();
 
+  if (state.flash && state.flash.a > 0.004){
+    ctx.save();
+    ctx.globalAlpha = state.flash.a;
+    ctx.fillStyle = state.flash.color;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+
   ctx.restore();
 }
 
@@ -1188,6 +1424,11 @@ function updateVisuals(dt){
   state.time += dt;
   state.shake *= Math.pow(0.0016, dt);
   if (state.shake < 0.30) state.shake = 0;
+
+  if (state.flash){
+    state.flash.a -= dt * 1.6;
+    if (state.flash.a <= 0) state.flash = null;
+  }
 
   if (state.cooldown > 0) state.cooldown = Math.max(0, state.cooldown - dt);
 
@@ -1215,7 +1456,8 @@ function updateVisuals(dt){
     const fs = state.fruits;
     for (let i=0;i<fs.length;i++){
       const f = fs[i];
-      if (f.age > 0.45 && (f.y - f.r) < DANGER_Y){
+      const flying = state.buffs.bird > 0 && f.level <= 2;
+      if (!flying && f.age > 0.45 && (f.y - f.r) < DANGER_Y){
         f.over += dt;
       } else {
         f.over = Math.max(0, f.over - dt*3);
@@ -1259,6 +1501,7 @@ const elChain = document.getElementById('chain');
 
 function bumpScore(){
   elScore.textContent = state.score;
+  elScore.classList.toggle('neg', state.score < 0);
   if (state.score > state.best){
     state.best = state.score;
     elBest.textContent = state.best;
@@ -1268,6 +1511,7 @@ function bumpScore(){
   elScore.classList.add('bump');
   setTimeout(()=>elScore.classList.remove('bump'), 190);
   updateChain();
+  updateGachaHud();
 }
 
 function buildChain(){
@@ -1300,14 +1544,233 @@ function updateChain(){
 
 function updateHud(){
   elScore.textContent = state.score;
+  elScore.classList.toggle('neg', state.score < 0);
   elBest.textContent = state.best;
-  if (URIS[state.next]){
-    elNextImg.src = URIS[state.next];
-  }
+  const nextUri = (URI_SETS[state.mood] && URI_SETS[state.mood][state.next]) || URIS[state.next];
+  if (nextUri) elNextImg.src = nextUri;
   elNextName.textContent = APPLES[state.next].name;
   elNextSize.textContent = APPLES[state.next].sub;
   updateChain();
+  updateGachaHud();
 }
+
+/* =========================================================
+   抽奖系统
+   ========================================================= */
+const GACHA_COST = 1000;   // 单次抽奖花费
+const GACHA_TABLE = [
+  { id:'win',   w:10, name:'胜', sub:'胜 · 变小', desc:'所有物件缩小 6%（最低缩到 50%），并微微发光。', tone:'good' },
+  { id:'lose',  w:10, name:'败', sub:'败 · 变大', desc:'所有物件放大 6%（最高放大到 200%），并变得暗淡。', tone:'bad' },
+  { id:'proud', w:10, name:'骄', sub:'骄 · 龇牙', desc:'所有物件龇牙咧嘴，音效变得欢快，并微微发光。', tone:'good' },
+  { id:'sad',   w:10, name:'哀', sub:'哀 · 哭脸', desc:'所有物件变成哭脸，并变得暗淡。', tone:'bad' },
+  { id:'bird',  w:10, name:'鸟', sub:'鸟 · 翅膀', desc:'所有物件长出小翅膀，上层的小苹果开始乱飞。', tone:'bird' },
+  { id:'human', w:20, name:'人', sub:'人 · 无事发生', desc:'没有额外效果。这就是人生。', tone:'none' },
+  { id:'A',     w:2,  name:'A',  sub:'A 类', desc:'得分 +5；随机获得「胜」或「骄」；再送一枚奖牌（金 80% / 银 20%）。', tone:'score' },
+  { id:'B',     w:10, name:'B',  sub:'B 类', desc:'得分不变；获得一枚奖牌（金 50% / 银 40% / 铜 10%）。', tone:'medal' },
+  { id:'C',     w:5,  name:'C',  sub:'C 类', desc:'得分 −20万；获得一枚奖牌（金 40% / 银 30% / 铜 30%）。', tone:'score' },
+  { id:'D',     w:10, name:'D',  sub:'D 类', desc:'得分 −2万；获得一枚奖牌（金 40% / 银 30% / 铜 30%）。', tone:'score' },
+  { id:'E',     w:3,  name:'E',  sub:'E 类', desc:'得分不变；随机获得「胜」或「骄」；再送一枚奖牌（金 60% / 银 40%）。', tone:'medal' }
+];
+const MEDAL_VALUE = { gold:300000, silver:100000, bronze:50000 };
+const MEDAL_NAME  = { gold:'金牌', silver:'银牌', bronze:'铜牌' };
+const MEDAL_ICON  = { gold:'🥇', silver:'🥈', bronze:'🥉' };
+
+function loadMedals(){
+  try{
+    const raw = JSON.parse(localStorage.getItem('dapingguo-medals') || '{}');
+    return { gold: raw.gold|0, silver: raw.silver|0, bronze: raw.bronze|0 };
+  }catch(e){ return { gold:0, silver:0, bronze:0 }; }
+}
+function saveMedals(){
+  try{ localStorage.setItem('dapingguo-medals', JSON.stringify(state.medals)); }catch(e){}
+}
+state.medals = loadMedals();
+
+function refreshScale(){
+  const raw = Math.pow(0.94, state.buffs.win) * Math.pow(1.06, state.buffs.lose);
+  state.rScale = clamp(raw, 0.5, 2.0);
+}
+function refreshGlow(){
+  const b = state.buffs;
+  state.glowNet = (b.win > 0 ? 1 : 0) + (b.proud ? 1 : 0) - (b.lose > 0 ? 1 : 0) - (b.sad ? 1 : 0);
+}
+
+function applyBuff(id){
+  const b = state.buffs;
+  if (id === 'win'){
+    b.win++;                       // 大小类：永久叠加
+  } else if (id === 'lose'){
+    b.lose++;
+  } else {
+    // 骄 / 哀 / 鸟：新的类会清掉之前所有非大小特效
+    b.proud = 0; b.sad = 0; b.bird = 0;
+    b[id] = 1;
+    state.mood = (id === 'proud') ? 'proud' : (id === 'sad' ? 'sad' : 'normal');
+  }
+  refreshScale();
+  refreshGlow();
+}
+
+function rollMedal(gp, sp, bp){
+  const r = Math.random() * 100;
+  if (r < gp) return 'gold';
+  if (r < gp + sp) return 'silver';
+  if (r < gp + sp + bp) return 'bronze';
+  return null;
+}
+
+function pickGacha(){
+  let r = Math.random() * 100;
+  for (let i=0;i<GACHA_TABLE.length;i++){
+    r -= GACHA_TABLE[i].w;
+    if (r <= 0) return GACHA_TABLE[i];
+  }
+  return GACHA_TABLE[0];
+}
+
+function addScoreValue(v, text, color){
+  state.score = state.score + v;
+  if (state.score > state.best){
+    state.best = state.score;
+    elBest.textContent = state.best;
+  }
+  bumpScore();
+  if (text){
+    addText(W/2, 330, text, color, 42);
+    burst(W/2, 330, { c:[color, '#ffffff', color] }, 34, 1.5);
+    state.shake = 20;
+    state.flash = { color: color, a: 0.5 };
+    sfx(v > 0 ? 'big' : 'over');
+  }
+}
+
+function applyDraw(id){
+  const res = { medal:null, text:'' };
+  switch(id){
+    case 'win':   applyBuff('win');   break;
+    case 'lose':  applyBuff('lose');  break;
+    case 'proud': applyBuff('proud'); break;
+    case 'sad':   applyBuff('sad');   break;
+    case 'bird':  applyBuff('bird');  break;
+    case 'human': break;
+    case 'A':
+      applyBuff(Math.random() < 0.5 ? 'win' : 'proud');
+      res.medal = rollMedal(80, 20, 0);
+      addScoreValue(5, '+5', '#f0a92b');
+      break;
+    case 'B':
+      res.medal = rollMedal(50, 40, 10);
+      break;
+    case 'C':
+      res.medal = rollMedal(40, 30, 30);
+      addScoreValue(-200000, '−200,000', '#d63b3b');
+      break;
+    case 'D':
+      res.medal = rollMedal(40, 30, 30);
+      addScoreValue(-20000, '−20,000', '#d63b3b');
+      break;
+    case 'E':
+      applyBuff(Math.random() < 0.5 ? 'win' : 'proud');
+      res.medal = rollMedal(60, 40, 0);
+      break;
+  }
+  if (res.medal){
+    state.medals[res.medal]++;
+    saveMedals();
+    res.text = MEDAL_ICON[res.medal] + ' 获得 ' + MEDAL_NAME[res.medal] + ' ×1';
+  }
+  refreshScale();
+  refreshGlow();
+  return res;
+}
+
+const gMask   = document.getElementById('gachaMask');
+const gName   = document.getElementById('gName');
+const gSub    = document.getElementById('gSub');
+const gDesc   = document.getElementById('gDesc');
+const gMedal  = document.getElementById('gMedal');
+
+function openGacha(){
+  if (state.drawing || state.gameOver) return;
+  if (state.score < GACHA_COST) return;
+  state.drawing = true;
+  state.score -= GACHA_COST;
+  bumpScore();
+  updateHud();
+  sfx('drop');
+
+  const item = pickGacha();
+  gName.classList.remove('pop');
+  gName.classList.add('rolling');
+  gSub.textContent = '';
+  gDesc.textContent = '……';
+  gMedal.textContent = '';
+  gMask.classList.add('show');
+
+  const names = GACHA_TABLE.map(g=>g.name);
+  let i = 0;
+  const timer = setInterval(()=>{ gName.textContent = names[(i++) % names.length]; }, 55);
+
+  setTimeout(()=>{
+    clearInterval(timer);
+    gName.classList.remove('rolling');
+    gName.textContent = item.name;
+    void gName.offsetWidth;
+    gName.classList.add('pop');
+    gSub.textContent = item.sub + ' · ' + item.w + '%';
+    gDesc.textContent = item.desc;
+
+    const res = applyDraw(item.id);
+    gMedal.textContent = res.text || (item.id === 'human' ? '（无事发生）' : '');
+    if (res.text) sfx('merge', 5); else sfx('merge', 1);
+    state.drawing = false;
+    updateHud();
+  }, 900);
+}
+
+function closeGacha(){
+  gMask.classList.remove('show');
+}
+
+function exchangeMedal(kind){
+  if (!state.medals[kind]) return;
+  state.medals[kind]--;
+  saveMedals();
+  addScoreValue(MEDAL_VALUE[kind], '+' + MEDAL_VALUE[kind].toLocaleString('en-US'), '#f0a92b');
+  updateHud();
+}
+
+function updateGachaHud(){
+  document.getElementById('mGold').textContent   = state.medals.gold;
+  document.getElementById('mSilver').textContent = state.medals.silver;
+  document.getElementById('mBronze').textContent = state.medals.bronze;
+  document.getElementById('mGoldBtn').disabled   = state.medals.gold   <= 0;
+  document.getElementById('mSilverBtn').disabled = state.medals.silver <= 0;
+  document.getElementById('mBronzeBtn').disabled = state.medals.bronze <= 0;
+
+  const btn = document.getElementById('btnGacha');
+  btn.disabled = state.score < GACHA_COST || state.gameOver;
+
+  const b = state.buffs;
+  const chips = [];
+  const add = (txt, cls)=> chips.push(`<span class="buffChip ${cls}">${txt}</span>`);
+  if (b.win)   add('胜 ×' + b.win, 'good');
+  if (b.lose)  add('败 ×' + b.lose, 'bad');
+  if (b.proud) add('骄 ×' + b.proud, 'good');
+  if (b.sad)   add('哀 ×' + b.sad, 'bad');
+  if (b.bird)  add('鸟 ×' + b.bird, 'bird');
+  if (Math.abs(state.rScale - 1) > 0.001){
+    add('体积 ' + Math.round(state.rScale * 100) + '%', state.rScale > 1 ? 'bad' : 'good');
+  }
+  document.getElementById('buffs').innerHTML = chips.join('');
+}
+
+document.getElementById('btnGacha').addEventListener('click', ()=>{ AC(); openGacha(); });
+document.getElementById('gOk').addEventListener('click', ()=>{ AC(); closeGacha(); });
+gMask.addEventListener('click', (e)=>{ if (e.target === gMask) closeGacha(); });
+document.getElementById('mGoldBtn').addEventListener('click', ()=>{ AC(); exchangeMedal('gold'); });
+document.getElementById('mSilverBtn').addEventListener('click', ()=>{ AC(); exchangeMedal('silver'); });
+document.getElementById('mBronzeBtn').addEventListener('click', ()=>{ AC(); exchangeMedal('bronze'); });
 
 /* =========================================================
    输入
@@ -1363,15 +1826,25 @@ btnSound.addEventListener('click', ()=>{
    精灵预加载
    ========================================================= */
 function loadSprites(){
-  const jobs = APPLES.map((cfg, i)=> new Promise(res=>{
-    const svg = buildSVG(cfg, SPR);
-    const uri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-    URIS[i] = uri;
-    const img = new Image();
-    img.onload = ()=>{ SPRITES[i] = img; res(); };
-    img.onerror = ()=>{ res(); };
-    img.src = uri;
-  }));
+  const jobs = [];
+  MOODS.forEach(mood=>{
+    APPLES.forEach((cfg, i)=>{
+      jobs.push(new Promise(res=>{
+        const svg = buildSVG(cfg, SPR, mood);
+        const uri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        URI_SETS[mood][i] = uri;
+        if (mood === 'normal') URIS[i] = uri;
+        const img = new Image();
+        img.onload = ()=>{
+          SPRITE_SETS[mood][i] = img;
+          DIM_SETS[mood][i] = makeDim(img);
+          res();
+        };
+        img.onerror = ()=>{ res(); };
+        img.src = uri;
+      }));
+    });
+  });
   return Promise.all(jobs);
 }
 
@@ -1379,6 +1852,7 @@ function loadSprites(){
    启动
    ========================================================= */
 document.getElementById('best').textContent = state.best;
+document.getElementById('gachaCost').textContent = GACHA_COST;
 reset();
 requestAnimationFrame(frame);
 
@@ -1388,7 +1862,7 @@ loadSprites().then(()=>{
 });
 
 // 调试/花式玩法钩子
-window.DPG = { state, APPLES, newFruit, reset, dropApple, sprites: SPRITES };
+window.DPG = { state, APPLES, newFruit, reset, dropApple, spriteFor, sets: SPRITE_SETS, applyDraw, exchangeMedal, updateHud };
 
 })();
 </script>
