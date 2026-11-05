@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>合成大苹果 · Q弹版</title>
+<style>
+  :root{
+    --ink:#4b3025;
+    --ink2:#8d6c58;
+    --card:rgba(255,255,255,.74);
+    --line:rgba(178,116,72,.16);
+    --shadow:0 18px 40px -18px rgba(150,88,45,.45);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(900px 700px at 10% -12%, #fffaf1 0%, rgba(255,250,241,0) 62%),
+      radial-gradient(900px 900px at 104% 112%, #ffd4ba 0%, rgba(255,212,186,0) 58%),
+      linear-gradient(158deg,#ffeede 0%, #ffe5d0 52%, #ffdbc3 100%);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .app{
+    display:flex; align-items:center; justify-content:center;
+    gap:26px; padding:18px; height:100%; width:100%;
+  }
+  .stage{
+    position:relative;
+    height:min(94vh, 880px);
+    aspect-ratio:520 / 780;
+    flex:0 0 auto;
+    filter:drop-shadow(0 28px 44px rgba(155,92,48,.30));
+  }
+  canvas{
+    width:100%; height:100%; display:block;
+    border-radius:34px;
+    touch-action:none;
+    cursor:pointer;
+  }
+  /* ---------- HUD ---------- */
+  .hud{
+    width:236px; flex:0 0 236px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; padding-left:4px;}
+  .brand .logo{
+    font-size:30px; line-height:1;
+    filter:drop-shadow(0 4px 6px rgba(200,90,60,.35));
+  }
+  .brand h1{
+    margin:0; font-size:21px; letter-spacing:.5px;
+    background:linear-gradient(92deg,#e2463c,#ff8a4c 55%,#f0a92b);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand p{margin:2px 0 0; font-size:11.5px; color:var(--ink2); letter-spacing:2px;}
+  .card{
+    background:var(--card);
+    border:1px solid rgba(255,255,255,.85);
+    border-radius:20px;
+    padding:13px 16px;
+    box-shadow:var(--shadow), 0 1px 0 rgba(255,255,255,.9) inset;
+    backdrop-filter:blur(8px);
+  }
+  .card .label{
+    display:block; font-size:11px; letter-spacing:2.4px;
+    color:var(--ink2); margin-bottom:5px;
+  }
+  .scoreCard{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
+  .scoreCard .label{width:100%;}
+  #score{
+    font-size:38px; font-weight:800; line-height:1;
+    font-variant-numeric:tabular-nums;
+    background:linear-gradient(180deg,#ff6b52,#d23b46);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    transition:transform .18s cubic-bezier(.3,1.7,.5,1);
+    transform-origin:left center;
+  }
+  #score.bump{transform:scale(1.22);}
+  .best{margin-left:auto; font-size:12px; color:var(--ink2);}
+  .best b{color:#d9503f; font-size:14px; font-variant-numeric:tabular-nums;}
+  .nextCard{display:flex; align-items:center; gap:12px;}
+  .nextCard .label{margin:0;}
+  .nextBox{
+    width:56px;height:56px;border-radius:16px;
+    background:radial-gradient(circle at 34% 28%,#fff,#ffe6d5);
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 6px 14px -8px rgba(160,95,50,.5) inset, 0 4px 10px -6px rgba(160,95,50,.4);
+  }
+  .nextBox img{width:46px;height:46px;object-fit:contain;}
+  .nextMeta{display:flex;flex-direction:column;gap:3px;}
+  .nextMeta .nm{font-size:13px;font-weight:700;}
+  .nextMeta .sub{font-size:11px;color:var(--ink2);}
+  .chainCard .label{margin-bottom:9px;}
+  .chain{display:flex; align-items:center; gap:2px; flex-wrap:wrap;}
+  .chain .ph{
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50%; opacity:.32; filter:grayscale(.55);
+    transition:opacity .25s, filter .25s, transform .25s;
+  }
+  .chain .ph.on{opacity:1; filter:none;}
+  .chain .ph img{display:block;width:100%;height:100%;object-fit:contain;}
+  .actions{display:flex; gap:9px;}
+  button{
+    flex:1; cursor:pointer; border:none;
+    font-family:inherit; font-size:13px; font-weight:700; color:#6b4331;
+    padding:11px 10px; border-radius:15px;
+    background:linear-gradient(180deg,#fff,#ffe9da);
+    box-shadow:0 8px 18px -10px rgba(150,88,45,.7), 0 1px 0 #fff inset, 0 0 0 1px rgba(190,130,90,.16);
+    transition:transform .12s, box-shadow .12s, filter .12s;
+  }
+  button:hover{filter:brightness(1.03);}
+  button:active{transform:translateY(2px) scale(.985); box-shadow:0 3px 8px -6px rgba(150,88,45,.7), 0 0 0 1px rgba(190,130,90,.16);}
+  button.primary{
+    background:linear-gradient(180deg,#ff8a6a,#e8443f);
+    color:#fff; box-shadow:0 14px 26px -12px rgba(214,62,56,.85), 0 1px 0 rgba(255,255,255,.4) inset;
+  }
+  /* ---------- overlay ---------- */
+  .overlay{
+    position:absolute; inset:0; border-radius:34px;
+    background:rgba(74,42,28,.34);
+    backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .3s;
+  }
+  .overlay.show{opacity:1; pointer-events:auto;}
+  .overCard{
+    width:76%; padding:26px 22px 22px; text-align:center;
+    background:linear-gradient(180deg,#fffdfa,#fff1e4);
+    border-radius:28px; border:1px solid #fff;
+    box-shadow:0 30px 60px -24px rgba(90,45,20,.6);
+    transform:translateY(14px) scale(.94); transition:transform .38s cubic-bezier(.2,1.5,.4,1);
+  }
+  .overlay.show .overCard{transform:none;}
+  .overCard .emoji{font-size:44px; line-height:1;}
+  .overCard h2{margin:8px 0 2px; font-size:20px;}
+  .overCard .tiny{margin:0; font-size:12px; color:var(--ink2); letter-spacing:2px;}
+  .overCard .bigScore{
+    font-size:52px; font-weight:800; line-height:1.1; margin:2px 0 0;
+    font-variant-numeric:tabular-nums;
+    background:linear-gradient(180deg,#ff7a5c,#cf3444);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .overCard .best2{margin:0 0 16px; font-size:12.5px; color:var(--ink2);}
+  .overCard .best2 b{color:#d9503f;}
+  @media (max-width:920px){
+    .app{flex-direction:column; gap:10px; padding:8px;}
+    .stage{height:min(66vh,720px);}
+    .hud{width:min(96vw,520px); flex:0 0 auto; flex-direction:row; flex-wrap:wrap; gap:8px;}
+    .brand{width:100%;}
+    .brand p{display:none;}
+    .scoreCard{flex:1; min-width:120px; padding:8px 12px;}
+    #score{font-size:26px;}
+    .nextCard{flex:0 0 auto; padding:8px 12px;}
+    .nextBox{width:40px;height:40px;border-radius:12px;}
+    .nextBox img{width:34px;height:34px;}
+    .chainCard{display:none;}
+    .actions{width:100%;}
+    .best{margin-left:0;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="overlay" id="overlay">
+      <div class="overCard">
+        <div class="emoji" id="overEmoji">🍎</div>
+        <h2 id="overTitle">苹果堆满啦</h2>
+        <p class="tiny">本 次 得 分</p>
+        <div class="bigScore" id="finalScore">0</div>
+        <p class="best2">历史最高 <b id="finalBest">0</b></p>
+        <button class="primary" id="btnAgain">再来一局</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="hud">
+    <div class="brand">
+      <span class="logo">🍎</span>
+      <div>
+        <h1>合成大苹果</h1>
+        <p>Q 弹 到 飞 起</p>
+      </div>
+    </div>
+
+    <div class="card scoreCard">
+      <span class="label">得分</span>
+      <strong id="score">0</strong>
+      <span class="best">最高 <b id="best">0</b></span>
+    </div>
+
+    <div class="card nextCard">
+      <div class="nextBox"><img id="nextImg" alt=""></div>
+      <div class="nextMeta">
+        <span class="label">下一个</span>
+        <span class="nm" id="nextName">dapingguo1</span>
+        <span class="sub" id="nextSize">小苹果</span>
+      </div>
+    </div>
+
+    <div class="card chainCard">
+      <span class="label">合成链</span>
+      <div class="chain" id="chain"></div>
+    </div>
+
+    <div class="actions">
+      <button id="btnSound">🔊 音效</button>
+      <button id="btnRestart">重新开始</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* =========================================================
+   常量 & 关卡配置
+   ========================================================= */
+const W = 520, H = 780;
+const WALL_L = 40, WALL_R = 480, FLOOR_Y = 742;
+const DANGER_Y = 170;
+const DROP_Y = 74;
+const G = 2400;
+const SPR = 320;              // 精灵画布尺寸
+const RC = 0.335;             // 苹果本体半径 / 精灵尺寸
+const CYC = 0.615;            // 本体圆心 y / 精灵尺寸
+const HALFW = 0.3551;         // 本体半宽 / 精灵尺寸 (1.06 * RC)
+
+const APPLES = [
+  { r:20, name:'dapingguo1', sub:'小苹果',   c:['#ffc9c9','#ff7a7a','#cf2f42'], deco:'sprout',  blush:.55 },
+  { r:27, name:'dapingguo2', sub:'青苹果',   c:['#dcf7a8','#8fd14f','#4a7f26'], deco:'leaves',  blush:.42 },
+  { r:35, name:'dapingguo3', sub:'金苹果',   c:['#ffeaa7','#f8c93f','#c1800e'], deco:'sparkle', blush:.5  },
+  { r:44, name:'dapingguo4', sub:'粉苹果',   c:['#ffd3e6','#ff8cb2','#c33a72'], deco:'flower',  blush:.62 },
+  { r:54, name:'dapingguo5', sub:'蜜苹果',   c:['#ffd6a9','#ff9a4a','#c25512'], deco:'sparkle2',blush:.48 },
+  { r:66, name:'dapingguo6', sub:'红苹果',   c:['#ffb8a8','#ef4a4a','#981b26'], deco:'crownS',  blush:.45 },
+  { r:80, name:'dapingguo7', sub:'紫晶苹果', c:['#e8cbff','#a86bf0','#5c2fa3'], deco:'tiara',   blush:.5  },
+  { r:98, name:'dapingguo8', sub:'黄金巨苹果',c:['#ffd0a4','#e8402f','#76101d'], deco:'royal',   blush:.4  }
+];
+const SCORE = [1, 2, 4, 8, 16, 32, 64, 128];
+
+/* =========================================================
+   可爱苹果 SVG 生成器
+   ========================================================= */
+function appleSVG(cfg, S){
+  const R = S*RC, cx = S*0.5, cy = S*CYC;
+  const [light, main, dark] = cfg.c;
+  const leafA = cfg.leafA || '#8ce89a';
+  const leafB = cfg.leafB || '#3fa257';
+  const ink = '#5d3726';
+
+  const leaf = (x,y,w,h,rot)=>`<g transform="translate(${x} ${y}) rotate(${rot})">
+      <path d="M ${-w} 0 C ${-w*0.55} ${-h*1.15} ${w*0.55} ${-h*1.15} ${w} 0 C ${w*0.55} ${h*1.15} ${-w*0.55} ${h*1.15} ${-w} 0 Z" fill="url(#lg)"/>
+      <path d="M ${-w*0.78} 0 L ${w*0.78} 0" stroke="rgba(255,255,255,.55)" stroke-width="${Math.max(1, h*0.17)}" stroke-linecap="round"/>
+    </g>`;
+
+  const sparkle = (x,y,s,op)=>`<path d="M ${x} ${y-s} Q ${x+s*0.26} ${y-s*0.26} ${x+s} ${y}
+      Q ${x+s*0.26} ${y+s*0.26} ${x} ${y+s} Q ${x-s*0.26} ${y+s*0.26} ${x-s} ${y}
+      Q ${x-s*0.26} ${y-s*0.26} ${x} ${y-s} Z" fill="#ffffff" opacity="${op||0.92}"/>`;
+
+  const flower = (x,y,s)=>{
+    let p = '';
+    for (let i=0;i<5;i++){
+      const a = -Math.PI/2 + i*Math.PI*2/5;
+      p += `<ellipse cx="${(x+Math.cos(a)*s*0.62).toFixed(2)}" cy="${(y+Math.sin(a)*s*0.62).toFixed(2)}" rx="${s*0.44}" ry="${s*0.44}" fill="#ffffff" opacity=".97"/>`;
+    }
+    p += `<circle cx="${x}" cy="${y}" r="${s*0.34}" fill="#ffd85e"/>`;
+    return p;
+  };
+
+  const crown = (x,y,w,h)=>`<path d="M ${x-w/2} ${y} L ${x-w/2} ${y-h*0.5} L ${x-w*0.24} ${y-h*0.12} L ${x} ${y-h} L ${x+w*0.24} ${y-h*0.12} L ${x+w/2} ${y-h*0.5} L ${x+w/2} ${y} Z"
+      fill="url(#gg)" stroke="#d99a1f" stroke-width="${Math.max(1,h*0.09)}" stroke-linejoin="round"/>
+    <circle cx="${x}" cy="${y-h*1.01}" r="${h*0.115}" fill="#fff6cf"/>
+    <circle cx="${x-w/2}" cy="${y-h*0.53}" r="${h*0.085}" fill="#fff6cf"/>
+    <circle cx="${x+w/2}" cy="${y-h*0.53}" r="${h*0.085}" fill="#fff6cf"/>`;
+
+  // 装饰：back 画在身体后面，front 画在身体前面
+  let back = '', front = '';
+  switch(cfg.deco){
+    case 'sprout':
+      back  = leaf(cx+R*0.17, cy-R*1.08, R*0.20, R*0.10, -34)
+            + leaf(cx-R*0.16, cy-R*1.04, R*0.16, R*0.08, 200);
+      break;
+    case 'leaves':
+      back  = leaf(cx+R*0.40, cy-R*0.96, R*0.38, R*0.18, -24)
+            + leaf(cx-R*0.34, cy-R*0.92, R*0.27, R*0.13, 208);
+      break;
+    case 'sparkle':
+      back  = leaf(cx+R*0.38, cy-R*0.96, R*0.34, R*0.16, -26);
+      front = sparkle(cx-R*0.54, cy-R*0.40, R*0.20, .85);
+      break;
+    case 'flower':
+      back  = leaf(cx+R*0.44, cy-R*0.94, R*0.36, R*0.17, -28);
+      front = flower(cx+R*0.34, cy-R*1.00, R*0.19);
+      break;
+    case 'sparkle2':
+      back  = leaf(cx+R*0.40, cy-R*0.96, R*0.37, R*0.17, -22)
+            + leaf(cx-R*0.36, cy-R*0.92, R*0.25, R*0.12, 210);
+      front = sparkle(cx-R*0.52, cy-R*0.46, R*0.17, .8);
+      break;
+    case 'crownS':
+      back  = leaf(cx+R*0.48, cy-R*0.92, R*0.34, R*0.16, -20);
+      front = crown(cx, cy-R*0.92, R*0.64, R*0.40);
+      break;
+    case 'tiara':
+      back  = leaf(cx+R*0.52, cy-R*0.90, R*0.36, R*0.17, -16);
+      front = crown(cx, cy-R*0.92, R*0.74, R*0.46)
+            + sparkle(cx-R*0.66, cy-R*0.44, R*0.15, .8);
+      break;
+    case 'royal':
+      back  = leaf(cx+R*0.58, cy-R*0.88, R*0.38, R*0.18, -14);
+      front = crown(cx, cy-R*0.92, R*0.84, R*0.52)
+            + sparkle(cx-R*0.70, cy-R*0.46, R*0.16, .85)
+            + sparkle(cx+R*0.72, cy+R*0.06, R*0.11, .7);
+      break;
+  }
+
+  const body = `M ${cx} ${cy-R*0.72}
+    C ${cx+R*0.30} ${cy-R*1.04}, ${cx+R*0.78} ${cy-R*0.96}, ${cx+R*0.94} ${cy-R*0.56}
+    C ${cx+R*1.07} ${cy-R*0.18}, ${cx+R*1.07} ${cy+R*0.28}, ${cx+R*0.86} ${cy+R*0.60}
+    C ${cx+R*0.72} ${cy+R*0.88}, ${cx+R*0.38} ${cy+R*1.02}, ${cx} ${cy+R*1.02}
+    C ${cx-R*0.38} ${cy+R*1.02}, ${cx-R*0.72} ${cy+R*0.88}, ${cx-R*0.86} ${cy+R*0.60}
+    C ${cx-R*1.07} ${cy+R*0.28}, ${cx-R*1.07} ${cy-R*0.18}, ${cx-R*0.94} ${cy-R*0.56}
+    C ${cx-R*0.78} ${cy-R*0.96}, ${cx-R*0.30} ${cy-R*1.04}, ${cx} ${cy-R*0.72} Z`;
+
+  const eyeX = R*0.37, eyeY = cy - R*0.06;
+  const eyeR = R*0.205, pupR = R*0.125;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+  <defs>
+    <radialGradient id="bg" cx="34%" cy="24%" r="82%">
+      <stop offset="0%" stop-color="${light}"/>
+      <stop offset="48%" stop-color="${main}"/>
+      <stop offset="100%" stop-color="${dark}"/>
+    </radialGradient>
+    <linearGradient id="lg" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0%" stop-color="${leafA}"/>
+      <stop offset="100%" stop-color="${leafB}"/>
+    </linearGradient>
+    <linearGradient id="gg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff2b0"/>
+      <stop offset="52%" stop-color="#ffd24a"/>
+      <stop offset="100%" stop-color="#e8a017"/>
+    </linearGradient>
+    <radialGradient id="hl" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
+      <stop offset="62%" stop-color="#ffffff" stop-opacity=".45"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sh" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4a0a12" stop-opacity=".20"/>
+      <stop offset="100%" stop-color="#4a0a12" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="bc"><path d="${body}"/></clipPath>
+  </defs>
+
+  <!-- 茎 -->
+  <path d="M ${cx-R*0.02} ${cy-R*0.70} C ${cx+R*0.06} ${cy-R*0.96}, ${cx+R*0.10} ${cy-R*1.10}, ${cx+R*0.15} ${cy-R*1.20}"
+        stroke="#8a5a2c" stroke-width="${R*0.12}" stroke-linecap="round" fill="none"/>
+
+  ${back}
+
+  <!-- 本体 -->
+  <path d="${body}" fill="url(#bg)" stroke="${dark}" stroke-width="${R*0.026}" stroke-opacity=".45"/>
+
+  <!-- 柔和暗部 / 顶部提亮 -->
+  <g clip-path="url(#bc)">
+    <ellipse cx="${cx}" cy="${cy+R*1.16}" rx="${R*1.10}" ry="${R*0.80}" fill="url(#sh)"/>
+    <ellipse cx="${cx-R*0.10}" cy="${cy-R*0.98}" rx="${R*0.90}" ry="${R*0.42}" fill="#ffffff" opacity=".14"/>
+  </g>
+
+  <!-- 高光 -->
+  <ellipse cx="${cx-R*0.44}" cy="${cy-R*0.52}" rx="${R*0.42}" ry="${R*0.28}" fill="url(#hl)"
+           transform="rotate(-38 ${cx-R*0.44} ${cy-R*0.52})" opacity=".85"/>
+  <ellipse cx="${cx+R*0.46}" cy="${cy-R*0.30}" rx="${R*0.13}" ry="${R*0.20}" fill="url(#hl)"
+           transform="rotate(26 ${cx+R*0.46} ${cy-R*0.30})" opacity=".8"/>
+
+  <!-- 腮红 -->
+  <ellipse cx="${cx-R*0.62}" cy="${cy+R*0.24}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${cfg.blush}"/>
+  <ellipse cx="${cx+R*0.62}" cy="${cy+R*0.24}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${cfg.blush}"/>
+
+  <!-- 眼睛 -->
+  <ellipse cx="${cx-eyeX}" cy="${eyeY}" rx="${eyeR}" ry="${eyeR*1.12}" fill="#fff"/>
+  <ellipse cx="${cx+eyeX}" cy="${eyeY}" rx="${eyeR}" ry="${eyeR*1.12}" fill="#fff"/>
+  <circle cx="${cx-eyeX+R*0.012}" cy="${eyeY+R*0.022}" r="${pupR}" fill="${ink}"/>
+  <circle cx="${cx+eyeX+R*0.012}" cy="${eyeY+R*0.022}" r="${pupR}" fill="${ink}"/>
+  <circle cx="${cx-eyeX-R*0.048}" cy="${eyeY-R*0.048}" r="${pupR*0.36}" fill="#fff"/>
+  <circle cx="${cx+eyeX-R*0.048}" cy="${eyeY-R*0.048}" r="${pupR*0.36}" fill="#fff"/>
+  <circle cx="${cx-eyeX+R*0.062}" cy="${eyeY+R*0.082}" r="${pupR*0.20}" fill="#fff" opacity=".9"/>
+  <circle cx="${cx+eyeX+R*0.062}" cy="${eyeY+R*0.082}" r="${pupR*0.20}" fill="#fff" opacity=".9"/>
+
+  <!-- 嘴 -->
+  <path d="M ${cx-R*0.17} ${cy+R*0.30} Q ${cx} ${cy+R*0.50} ${cx+R*0.17} ${cy+R*0.30}"
+        stroke="${ink}" stroke-width="${R*0.06}" stroke-linecap="round" fill="none" opacity=".88"/>
+
+  ${front}
+  </svg>`;
+}
+
+/* =========================================================
+   状态
+   ========================================================= */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+cv.width = Math.round(W*DPR);
+cv.height = Math.round(H*DPR);
+
+const SPRITES = new Array(APPLES.length).fill(null);
+const URIS = new Array(APPLES.length).fill('');
+
+const state = {
+  fruits: [], particles: [], texts: [],
+  score: 0, best: parseInt(localStorage.getItem('dapingguo-best')||'0', 10) || 0,
+  current: 0, next: 1,
+  cooldown: 0, overTimer: 0, gameOver: false,
+  aimX: W/2, shake: 0, time: 0, drops: 0, maxLevel: 0,
+  muted: false
+};
+
+/* =========================================================
+   工具
+   ========================================================= */
+const clamp = (v,a,b)=> v<a?a:(v>b?b:v);
+const rnd = (a,b)=> a + Math.random()*(b-a);
+const TAU = Math.PI*2;
+
+function roundRect(c,x,y,w,h,r){
+  const rr = Math.min(r, Math.abs(w)/2, Math.abs(h)/2);
+  c.beginPath();
+  c.moveTo(x+rr,y);
+  c.arcTo(x+w,y,x+w,y+h,rr);
+  c.arcTo(x+w,y+h,x,y+h,rr);
+  c.arcTo(x,y+h,x,y,rr);
+  c.arcTo(x,y,x+w,y,rr);
+  c.closePath();
+}
+
+/* =========================================================
+   音效
+   ========================================================= */
+let actx = null;
+function AC(){
+  if (!actx){
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    actx = new C();
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function tone(freq, freq2, dur, type, vol, delay){
+  const ac = AC(); if (!ac) return;
+  const t = ac.currentTime + (delay||0);
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type || 'sine';
+  o.frequency.setValueAtTime(freq, t);
+  if (freq2) o.frequency.exponentialRampToValueAtTime(freq2, t + dur*0.85);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.014);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function sfx(kind, lv){
+  if (state.muted) return;
+  if (kind === 'merge'){
+    const f = 300 * Math.pow(1.14, lv||0);
+    tone(f, f*2.05, 0.20, 'sine', 0.20);
+    tone(f*1.5, f*2.6, 0.14, 'triangle', 0.09, 0.02);
+  } else if (kind === 'big'){
+    tone(180, 900, 0.42, 'triangle', 0.22);
+    tone(320, 1400, 0.32, 'sine', 0.14, 0.05);
+  } else if (kind === 'drop'){
+    tone(210, 130, 0.09, 'sine', 0.12);
+  } else if (kind === 'over'){
+    tone(520, 200, 0.5, 'sine', 0.2);
+    tone(390, 130, 0.6, 'triangle', 0.14, 0.1);
+  }
+}
+
+/* =========================================================
+   物理
+   ========================================================= */
+const SQ_K = 300, SQ_C = 8.5;
+
+function newFruit(x,y,level){
+  const A = APPLES[level];
+  return {
+    x, y, r:A.r, level,
+    vx:0, vy:0, angle:rnd(-0.18,0.18), av:rnd(-0.5,0.5),
+    sq:0, vsq:0, sa:Math.PI/2,
+    age:0, pop:0, over:0
+  };
+}
+function squashHit(f, speed, axis){
+  // 只有真正的撞击才形变；静止接触不注入能量，否则苹果会一直被压扁
+  if (speed < 110) return;
+  const v = Math.min(3.6, (speed - 100) * 0.0042);
+  if (v <= 0.05) return;
+  f.vsq += v;
+  f.sa = axis;
+}
+
+function stepPhysics(dt){
+  const fs = state.fruits;
+
+  // 积分
+  for (let i=0;i<fs.length;i++){
+    const f = fs[i];
+    f.vy += G*dt;
+    f.vx *= (1 - 0.55*dt);
+    f.x += f.vx*dt;
+    f.y += f.vy*dt;
+    f.age += dt;
+
+    // 旋转：向 0 回正的弹簧（保持脸蛋朝上）
+    f.av += (-f.angle*9 - f.av*4.6)*dt;
+    f.angle += f.av*dt;
+    if (f.angle > 0.62){ f.angle = 0.62; f.av *= -0.4; }
+    if (f.angle < -0.62){ f.angle = -0.62; f.av *= -0.4; }
+
+    // 形变弹簧（果冻感）
+    f.vsq += (-SQ_K*f.sq - SQ_C*f.vsq)*dt;
+    f.sq += f.vsq*dt;
+    if (f.sq > 0.19){ f.sq = 0.19; f.vsq *= 0.4; }
+    if (f.sq < -0.18){ f.sq = -0.18; f.vsq *= 0.4; }
+
+    if (f.pop > 0) f.pop = Math.max(0, f.pop - dt*4.5);
+  }
+
+  clampWalls(fs);
+  solveCollisions(dt);
+  // 分离之后再约束一次边界，避免被同伴挤出罐壁
+  clampWalls(state.fruits);
+}
+
+function clampWalls(list){
+  for (let i=0;i<list.length;i++){
+    const f = list[i];
+    if (f.x - f.r < WALL_L){
+      f.x = WALL_L + f.r;
+      if (f.vx < 0){
+        const s = -f.vx;
+        squashHit(f, s, 0);
+        f.vx = s * (s > 250 ? 0.68 : 0.14);
+      }
+    } else if (f.x + f.r > WALL_R){
+      f.x = WALL_R - f.r;
+      if (f.vx > 0){
+        const s = f.vx;
+        squashHit(f, s, 0);
+        f.vx = -s * (s > 250 ? 0.68 : 0.14);
+      }
+    }
+    if (f.y + f.r > FLOOR_Y){
+      f.y = FLOOR_Y - f.r;
+      if (f.vy > 0){
+        const s = f.vy;
+        squashHit(f, s, Math.PI/2);
+        f.vy = -s * (s > 210 ? 0.71 : 0.12);
+        f.av += f.vx * 0.0016;
+      }
+    }
+    if (f.y - f.r < 10){
+      f.y = 10 + f.r;
+      if (f.vy < 0) f.vy *= -0.25;
+    }
+  }
+}
+
+function solveCollisions(dt){
+  const fs = state.fruits;
+  const dead = new Set();
+  const merges = [];
+  const n = fs.length;
+
+  for (let i=0;i<n;i++){
+    const a = fs[i];
+    if (dead.has(a)) continue;
+    for (let j=i+1;j<n;j++){
+      const b = fs[j];
+      if (dead.has(b)) continue;
+
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const minD = a.r + b.r;
+      const d2 = dx*dx + dy*dy;
+      if (d2 > minD*minD) continue;
+
+      let d = Math.sqrt(d2);
+      let nx, ny;
+      if (d < 0.0001){ d = 0.0001; nx = 0; ny = -1; }
+      else { nx = dx/d; ny = dy/d; }
+
+      // —— 同号合成 ——
+      if (a.level === b.level && a.age > 0.02 && b.age > 0.02){
+        dead.add(a); dead.add(b);
+        merges.push([a,b]);
+        continue;
+      }
+
+      const overlap = minD - d;
+      const ma = a.r*a.r, mb = b.r*b.r, tot = ma + mb;
+      const corr = Math.max(0, overlap - 0.02) * 0.92;
+      a.x -= nx*corr*(mb/tot); a.y -= ny*corr*(mb/tot);
+      b.x += nx*corr*(ma/tot); b.y += ny*corr*(ma/tot);
+
+      const rvx = b.vx - a.vx, rvy = b.vy - a.vy;
+      const rvn = rvx*nx + rvy*ny;
+      if (rvn < 0){
+        const sp = -rvn;
+        const e = sp > 450 ? 0.48 : (sp > 200 ? 0.30 : 0.05);
+        const im = 1/(1/ma + 1/mb);
+        const jn = -(1+e)*rvn*im;
+        a.vx -= nx*jn/ma; a.vy -= ny*jn/ma;
+        b.vx += nx*jn/ma; b.vy += ny*jn/ma;
+
+        const tx = -ny, ty = nx;
+        const rvt = rvx*tx + rvy*ty;
+        const jt = -rvt*im*0.20;
+        a.vx -= tx*jt/ma; a.vy -= ty*jt/ma;
+        b.vx += tx*jt/ma; b.vy += ty*jt/ma;
+
+        squashHit(a, sp, Math.atan2(ny,nx));
+        squashHit(b, sp, Math.atan2(ny,nx));
+        a.av -= clamp(rvt*0.0016, -1.2, 1.2);
+        b.av += clamp(rvt*0.0016, -1.2, 1.2);
+      }
+    }
+  }
+
+  if (merges.length){
+    const newOnes = [];
+    for (let k=0;k<merges.length;k++){
+      const nf = doMerge(merges[k][0], merges[k][1]);
+      if (nf) newOnes.push(nf);
+    }
+    state.fruits = fs.filter(f=>!dead.has(f)).concat(newOnes);
+  }
+}
+
+function doMerge(a, b){
+  const lv = a.level;
+  const mx = (a.x + b.x)/2, my = (a.y + b.y)/2;
+
+  if (lv === APPLES.length - 1){
+    // 两个终极苹果相撞 → 爆开
+    state.score += 300;
+    burst(mx, my, APPLES[lv], 46, 1.5);
+    addText(mx, my - 20, '+300', '#e8402f', 26);
+    state.shake = 16;
+    sfx('big');
+    bumpScore();
+    return null;
+  }
+
+  const nl = lv + 1;
+  const f = newFruit(mx, my, nl);
+  f.vx = (a.vx + b.vx) * 0.22;
+  f.vy = (a.vy + b.vy) * 0.22 - 130;
+  f.sq = 0; f.vsq = -2.6; f.sa = Math.PI/2;
+  f.pop = 1;
+  f.age = 0;
+
+  state.score += SCORE[lv];
+  state.maxLevel = Math.max(state.maxLevel, nl);
+  burst(mx, my, APPLES[lv], 10 + lv*3, 1);
+  addText(mx, my - 14, '+' + SCORE[lv], '#d9503f', 15 + lv*1.2);
+  state.shake = Math.min(11, 2.2 + lv*1.1);
+  sfx('merge', lv);
+  bumpScore();
+  return f;
+}
+
+function burst(x, y, cfg, count, power){
+  const colors = [cfg.c[0], cfg.c[1], cfg.c[2], '#fff3d6'];
+  for (let i=0;i<count;i++){
+    const a = Math.random()*TAU;
+    const sp = rnd(60, 380) * (power||1);
+    state.particles.push({
+      x, y,
+      vx: Math.cos(a)*sp,
+      vy: Math.sin(a)*sp - 90,
+      r: rnd(2.5, 7)*(power||1),
+      life: rnd(0.35, 0.85),
+      max: 0.85,
+      c: colors[(Math.random()*colors.length)|0]
+    });
+  }
+}
+
+function addText(x, y, txt, color, size){
+  state.texts.push({ x, y, txt, color, size, life:0.9, max:0.9, vy:-80 });
+}
+
+/* =========================================================
+   游戏流程
+   ========================================================= */
+function randLevel(){
+  const r = Math.random();
+  if (r < 0.32) return 0;
+  if (r < 0.63) return 1;
+  if (r < 0.87) return 2;
+  return 3;
+}
+
+function reset(){
+  state.fruits = [];
+  state.particles = [];
+  state.texts = [];
+  state.score = 0;
+  state.current = randLevel();
+  state.next = randLevel();
+  state.cooldown = 0;
+  state.overTimer = 0;
+  state.gameOver = false;
+  state.time = 0;
+  state.drops = 0;
+  state.maxLevel = 0;
+  state.shake = 0;
+  document.getElementById('overlay').classList.remove('show');
+  updateHud();
+}
+
+function dropApple(){
+  if (state.gameOver || state.cooldown > 0 || !SPRITES[state.current]) return;
+  const lv = state.current;
+  const r = APPLES[lv].r;
+  const x = clamp(state.aimX, WALL_L + r + 2, WALL_R - r - 2);
+  const f = newFruit(x, DROP_Y, lv);
+  f.vy = 180;
+  f.age = 0;
+  state.fruits.push(f);
+  state.current = state.next;
+  state.next = randLevel();
+  state.cooldown = 0.40;
+  state.drops++;
+  sfx('drop');
+  updateHud();
+}
+
+function gameOver(){
+  if (state.gameOver) return;
+  state.gameOver = true;
+  if (state.score > state.best){
+    state.best = state.score;
+    try{ localStorage.setItem('dapingguo-best', String(state.best)); }catch(e){}
+  }
+  document.getElementById('finalScore').textContent = state.score;
+  document.getElementById('finalBest').textContent = state.best;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('best').textContent = state.best;
+  sfx('over');
+}
+
+/* =========================================================
+   渲染
+   ========================================================= */
+function drawBg(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#fffaf3');
+  g.addColorStop(0.55,'#fff2e4');
+  g.addColorStop(1,'#ffe6d2');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  let rg = ctx.createRadialGradient(120, 90, 10, 120, 90, 320);
+  rg.addColorStop(0,'rgba(255,214,170,.55)');
+  rg.addColorStop(1,'rgba(255,214,170,0)');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,W,H);
+
+  rg = ctx.createRadialGradient(430, 640, 10, 430, 640, 340);
+  rg.addColorStop(0,'rgba(255,178,190,.35)');
+  rg.addColorStop(1,'rgba(255,178,190,0)');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,W,H);
+}
+
+function drawJar(){
+  // 罐体
+  ctx.save();
+  roundRect(ctx, WALL_L-5, DANGER_Y-38, (WALL_R-WALL_L)+10, (FLOOR_Y+14)-(DANGER_Y-38), 30);
+  const g = ctx.createLinearGradient(WALL_L, 0, WALL_R, 0);
+  g.addColorStop(0,'rgba(255,255,255,.62)');
+  g.addColorStop(0.5,'rgba(255,255,255,.34)');
+  g.addColorStop(1,'rgba(255,255,255,.62)');
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(255,255,255,.95)';
+  ctx.stroke();
+  ctx.restore();
+
+  // 内阴影（底部）
+  ctx.save();
+  roundRect(ctx, WALL_L-5, DANGER_Y-38, (WALL_R-WALL_L)+10, (FLOOR_Y+14)-(DANGER_Y-38), 30);
+  ctx.clip();
+  const sg = ctx.createLinearGradient(0, FLOOR_Y-150, 0, FLOOR_Y+10);
+  sg.addColorStop(0,'rgba(190,120,70,0)');
+  sg.addColorStop(1,'rgba(190,120,70,.20)');
+  ctx.fillStyle = sg;
+  ctx.fillRect(WALL_L-5, FLOOR_Y-150, WALL_R-WALL_L+10, 165);
+  ctx.restore();
+
+  // 底部圆角线
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(WALL_L-5, FLOOR_Y+14);
+  ctx.lineTo(WALL_R+5, FLOOR_Y+14);
+  ctx.strokeStyle = 'rgba(200,140,95,.25)';
+  ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.restore();
+
+  // 危险线
+  const danger = state.overTimer / 1.8;
+  ctx.save();
+  ctx.setLineDash([13,11]);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = danger > 0.02
+    ? `rgba(232,64,47,${0.35 + danger*0.6})`
+    : 'rgba(214,140,95,.42)';
+  ctx.beginPath();
+  ctx.moveTo(WALL_L+2, DANGER_Y);
+  ctx.lineTo(WALL_R-2, DANGER_Y);
+  ctx.stroke();
+  ctx.restore();
+
+  if (danger > 0.02){
+    ctx.save();
+    const ag = ctx.createLinearGradient(0, DANGER_Y-40, 0, DANGER_Y);
+    ag.addColorStop(0,'rgba(232,64,47,0)');
+    ag.addColorStop(1,`rgba(232,64,47,${0.10*danger + 0.03})`);
+    ctx.fillStyle = ag;
+    ctx.fillRect(WALL_L-10, DANGER_Y-40, WALL_R-WALL_L+20, 40);
+    ctx.restore();
+  }
+}
+
+const VIS = 0.962;      // 视觉半径 / 碰撞半径，留一点点缝，保证永不穿模
+const MAX_SCALE = 1.038; // 形变后最大外扩：0.962×1.038 ≈ 0.999，始终不超出碰撞圆
+
+function drawSpriteRaw(x, y, r, level, sq, angle, sa, alpha, extraScale){
+  const img = SPRITES[level];
+  const size = r * (1/HALFW) * VIS;
+  const p = extraScale || 1;
+  let sx = (1-sq)*p, sy = (1+sq)*p;
+  const m = Math.max(Math.abs(sx), Math.abs(sy));
+  if (m > MAX_SCALE){
+    const k = MAX_SCALE/m;
+    sx *= k; sy *= k;
+  }
+  ctx.save();
+  ctx.globalAlpha = alpha === undefined ? 1 : alpha;
+  ctx.translate(x, y);
+  ctx.rotate(sa);
+  ctx.scale(sx, sy);
+  ctx.rotate(angle - sa);
+  if (img){
+    ctx.drawImage(img, -size/2, -CYC*size, size, size);
+  } else {
+    ctx.beginPath();
+    ctx.arc(0,0,r,0,TAU);
+    ctx.fillStyle = APPLES[level].c[1];
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawFruit(f){
+  const popScale = 1 + 0.16*f.pop;
+  drawSpriteRaw(f.x, f.y, f.r, f.level, f.sq, f.angle, f.sa, 1, popScale);
+}
+
+function estimateLanding(x, r){
+  let best = FLOOR_Y;
+  const fs = state.fruits;
+  for (let i=0;i<fs.length;i++){
+    const f = fs[i];
+    const dx = f.x - x;
+    const rr = f.r + r*0.94;
+    if (Math.abs(dx) >= rr) continue;
+    const y = f.y - Math.sqrt(rr*rr - dx*dx);
+    if (y < best) best = y;
+  }
+  return Math.max(DANGER_Y - 40, best);
+}
+
+function drawGuide(){
+  if (state.gameOver) return;
+  const lv = state.current;
+  const r = APPLES[lv].r;
+  const x = clamp(state.aimX, WALL_L + r + 2, WALL_R - r - 2);
+  const ready = state.cooldown <= 0;
+  const alpha = ready ? 1 : clamp(1 - state.cooldown/0.40, 0, 1);
+
+  const landY = estimateLanding(x, r);
+
+  ctx.save();
+  ctx.setLineDash([9,12]);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = `rgba(190,130,90,${0.30*alpha})`;
+  ctx.beginPath();
+  ctx.moveTo(x, DROP_Y + r*0.9);
+  ctx.lineTo(x, landY - r*0.15);
+  ctx.stroke();
+  ctx.restore();
+
+  // 落点阴影
+  ctx.save();
+  ctx.globalAlpha = 0.11 * alpha;
+  ctx.fillStyle = '#8a5230';
+  ctx.beginPath();
+  ctx.ellipse(x, landY + 3, r*0.62, r*0.19, 0, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+
+  if (!ready) return;
+  const bob = Math.sin(state.time*4.2)*4;
+  drawSpriteRaw(x, DROP_Y + bob, r, lv, 0, 0, Math.PI/2, 0.96, 1);
+
+  if (state.drops === 0){
+    ctx.save();
+    ctx.globalAlpha = 0.55 + Math.sin(state.time*3)*0.2;
+    ctx.fillStyle = '#a9744f';
+    ctx.font = '600 15px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('移动 · 点击落下苹果', W/2, FLOOR_Y - 60);
+    ctx.restore();
+  }
+}
+
+function drawParticles(){
+  const ps = state.particles;
+  for (let i=0;i<ps.length;i++){
+    const p = ps[i];
+    const a = clamp(p.life / p.max, 0, 1);
+    ctx.globalAlpha = a;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r*a, 0, TAU);
+    ctx.fillStyle = p.c;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawTexts(){
+  const ts = state.texts;
+  ctx.textAlign = 'center';
+  for (let i=0;i<ts.length;i++){
+    const t = ts[i];
+    const a = clamp(t.life / t.max, 0, 1);
+    ctx.globalAlpha = a;
+    ctx.font = `800 ${t.size}px "PingFang SC","Microsoft YaHei",sans-serif`;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.strokeText(t.txt, t.x, t.y);
+    ctx.fillStyle = t.color;
+    ctx.fillText(t.txt, t.x, t.y);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function render(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  const sh = state.shake;
+  ctx.save();
+  if (sh > 0.3){
+    ctx.translate(rnd(-sh,sh)*0.6, rnd(-sh,sh)*0.6);
+  }
+
+  drawBg();
+  drawJar();
+  drawGuide();
+
+  // 果实层裁到罐壁内侧：叶子/皇冠不会穿出玻璃
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(WALL_L - 1, 0, (WALL_R - WALL_L) + 2, FLOOR_Y + 2);
+  ctx.clip();
+
+  const fs = state.fruits;
+  for (let i=0;i<fs.length;i++) drawFruit(fs[i]);
+  drawParticles();
+  ctx.restore();
+
+  drawTexts();
+
+  ctx.restore();
+}
+
+/* =========================================================
+   循环
+   ========================================================= */
+const FIXED = 1/240;
+let lastT = performance.now();
+let acc = 0;
+
+function updateVisuals(dt){
+  state.time += dt;
+  state.shake *= Math.pow(0.0016, dt);
+  if (state.shake < 0.30) state.shake = 0;
+
+  if (state.cooldown > 0) state.cooldown = Math.max(0, state.cooldown - dt);
+
+  // 粒子
+  for (let i=state.particles.length-1;i>=0;i--){
+    const p = state.particles[i];
+    p.vy += 1500*dt;
+    p.x += p.vx*dt; p.y += p.vy*dt;
+    p.vx *= (1 - 0.9*dt);
+    p.life -= dt;
+    if (p.life <= 0 || p.y > H + 40) state.particles.splice(i,1);
+  }
+  // 文字
+  for (let i=state.texts.length-1;i>=0;i--){
+    const t = state.texts[i];
+    t.y += t.vy*dt;
+    t.vy *= (1 - 2.2*dt);
+    t.life -= dt;
+    if (t.life <= 0) state.texts.splice(i,1);
+  }
+
+  // 危险检测：任一颗苹果“顶边越线”持续累计超时即结束（与速度无关，弹跳中的苹果也算）
+  if (!state.gameOver){
+    let maxOver = 0;
+    const fs = state.fruits;
+    for (let i=0;i<fs.length;i++){
+      const f = fs[i];
+      if (f.age > 0.45 && (f.y - f.r) < DANGER_Y){
+        f.over += dt;
+      } else {
+        f.over = Math.max(0, f.over - dt*3);
+      }
+      if (f.over > maxOver) maxOver = f.over;
+    }
+    state.overTimer = maxOver;
+    if (maxOver > 1.8) gameOver();
+  }
+}
+
+function frame(now){
+  let dt = (now - lastT) / 1000;
+  lastT = now;
+  if (!isFinite(dt) || dt < 0) dt = 0;
+  dt = Math.min(dt, 0.05);
+
+  acc += dt;
+  let steps = 0;
+  while (acc >= FIXED && steps < 14){
+    stepPhysics(FIXED);
+    acc -= FIXED;
+    steps++;
+  }
+  if (steps >= 14) acc = 0;
+
+  updateVisuals(dt);
+  render();
+  requestAnimationFrame(frame);
+}
+
+/* =========================================================
+   HUD
+   ========================================================= */
+const elScore = document.getElementById('score');
+const elBest = document.getElementById('best');
+const elNextImg = document.getElementById('nextImg');
+const elNextName = document.getElementById('nextName');
+const elNextSize = document.getElementById('nextSize');
+const elChain = document.getElementById('chain');
+
+function bumpScore(){
+  elScore.textContent = state.score;
+  if (state.score > state.best){
+    state.best = state.score;
+    elBest.textContent = state.best;
+  }
+  elScore.classList.remove('bump');
+  void elScore.offsetWidth;
+  elScore.classList.add('bump');
+  setTimeout(()=>elScore.classList.remove('bump'), 190);
+}
+
+function buildChain(){
+  elChain.innerHTML = '';
+  for (let i=0;i<APPLES.length;i++){
+    const d = document.createElement('div');
+    d.className = 'ph';
+    const s = 13 + i*2.6;
+    d.style.width = s + 'px';
+    d.style.height = s + 'px';
+    if (URIS[i]){
+      const im = document.createElement('img');
+      im.src = URIS[i];
+      im.alt = APPLES[i].name;
+      im.title = APPLES[i].name + ' · ' + APPLES[i].sub;
+      d.appendChild(im);
+    }
+    elChain.appendChild(d);
+  }
+}
+
+function updateHud(){
+  elScore.textContent = state.score;
+  elBest.textContent = state.best;
+  if (URIS[state.next]){
+    elNextImg.src = URIS[state.next];
+  }
+  elNextName.textContent = APPLES[state.next].name;
+  elNextSize.textContent = APPLES[state.next].sub;
+  const kids = elChain.children;
+  for (let i=0;i<kids.length;i++){
+    if (i <= state.maxLevel) kids[i].classList.add('on');
+    else kids[i].classList.remove('on');
+  }
+}
+
+/* =========================================================
+   输入
+   ========================================================= */
+function pointerToWorld(e){
+  const rect = cv.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width * W;
+  return x;
+}
+cv.addEventListener('pointermove', e=>{
+  state.aimX = pointerToWorld(e);
+});
+cv.addEventListener('pointerdown', e=>{
+  e.preventDefault();
+  state.aimX = pointerToWorld(e);
+  AC();
+  dropApple();
+});
+cv.addEventListener('pointerup', e=> e.preventDefault());
+cv.addEventListener('contextmenu', e=> e.preventDefault());
+
+window.addEventListener('keydown', e=>{
+  const step = 18;
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A'){
+    state.aimX = clamp(state.aimX - step, WALL_L, WALL_R);
+    e.preventDefault();
+  } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D'){
+    state.aimX = clamp(state.aimX + step, WALL_L, WALL_R);
+    e.preventDefault();
+  } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown'){
+    e.preventDefault();
+    AC();
+    dropApple();
+  } else if (e.key === 'r' || e.key === 'R'){
+    reset();
+  }
+});
+
+document.getElementById('btnRestart').addEventListener('click', ()=>{
+  AC(); reset();
+});
+document.getElementById('btnAgain').addEventListener('click', ()=>{
+  AC(); reset();
+});
+const btnSound = document.getElementById('btnSound');
+btnSound.addEventListener('click', ()=>{
+  state.muted = !state.muted;
+  btnSound.textContent = state.muted ? '🔇 静音' : '🔊 音效';
+  if (!state.muted) { AC(); sfx('drop'); }
+});
+
+/* =========================================================
+   精灵预加载
+   ========================================================= */
+function loadSprites(){
+  const jobs = APPLES.map((cfg, i)=> new Promise(res=>{
+    const svg = appleSVG(cfg, SPR);
+    const uri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    URIS[i] = uri;
+    const img = new Image();
+    img.onload = ()=>{ SPRITES[i] = img; res(); };
+    img.onerror = ()=>{ res(); };
+    img.src = uri;
+  }));
+  return Promise.all(jobs);
+}
+
+/* =========================================================
+   启动
+   ========================================================= */
+document.getElementById('best').textContent = state.best;
+reset();
+requestAnimationFrame(frame);
+
+loadSprites().then(()=>{
+  buildChain();
+  updateHud();
+});
+
+// 调试/花式玩法钩子
+window.DPG = { state, APPLES, newFruit, reset, dropApple, sprites: SPRITES };
+
+})();
+</script>
+</body>
+</html>
