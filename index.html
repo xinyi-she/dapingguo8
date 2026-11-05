@@ -96,7 +96,7 @@
   .nextMeta .nm{font-size:13px;font-weight:700;}
   .nextMeta .sub{font-size:11px;color:var(--ink2);}
   .chainCard .label{margin-bottom:9px;}
-  .chain{display:flex; align-items:center; gap:2px; flex-wrap:wrap;}
+  .chain{display:grid; grid-template-columns:repeat(5, 1fr); gap:6px 2px; justify-items:center; align-items:center;}
   .chain .ph{
     display:flex;align-items:center;justify-content:center;
     border-radius:50%; opacity:.32; filter:grayscale(.55);
@@ -241,9 +241,11 @@ const APPLES = [
   { r:54, name:'dapingguo5', sub:'蜜苹果',   c:['#ffd6a9','#ff9a4a','#c25512'], deco:'sparkle2',blush:.48 },
   { r:66, name:'dapingguo6', sub:'红苹果',   c:['#ffb8a8','#ef4a4a','#981b26'], deco:'crownS',  blush:.45 },
   { r:80, name:'dapingguo7', sub:'紫晶苹果', c:['#e8cbff','#a86bf0','#5c2fa3'], deco:'tiara',   blush:.5  },
-  { r:98, name:'dapingguo8', sub:'黄金巨苹果',c:['#ffd0a4','#e8402f','#76101d'], deco:'royal',   blush:.4  }
+  { r:98, name:'dapingguo8', sub:'黄金巨苹果',c:['#ffd0a4','#e8402f','#76101d'], deco:'royal',   blush:.4  },
+  { r:112, name:'buding', sub:'焦糖布丁',   c:['#fff0c0','#ffcf6b','#c8871a'], kind:'pudding', blush:.5, tilt:0.22  },
+  { r:128, name:'dangao', sub:'奶油蛋糕',   c:['#ffeec6','#f3c877','#c98f3e'], kind:'cake',    blush:.55, tilt:0.18 }
 ];
-const SCORE = [1, 2, 4, 8, 16, 32, 64, 128];
+const SCORE = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
 
 /* =========================================================
    可爱苹果 SVG 生成器
@@ -404,6 +406,183 @@ function appleSVG(cfg, S){
 }
 
 /* =========================================================
+   布丁 / 蛋糕 造型（与苹果同一套表情风格）
+   ========================================================= */
+function faceSVG(cx, faceY, R, ink, blush, spread){
+  const ex = R*(spread || 0.40);
+  const eyeR = R*0.20, pupR = R*0.122;
+  let s = '';
+  s += `<ellipse cx="${cx-R*0.73}" cy="${faceY+R*0.28}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${blush}"/>`;
+  s += `<ellipse cx="${cx+R*0.73}" cy="${faceY+R*0.28}" rx="${R*0.17}" ry="${R*0.11}" fill="#ff5f7e" opacity="${blush}"/>`;
+  s += `<ellipse cx="${cx-ex}" cy="${faceY}" rx="${eyeR}" ry="${eyeR*1.12}" fill="#fff"/>`;
+  s += `<ellipse cx="${cx+ex}" cy="${faceY}" rx="${eyeR}" ry="${eyeR*1.12}" fill="#fff"/>`;
+  s += `<circle cx="${cx-ex+R*0.012}" cy="${faceY+R*0.022}" r="${pupR}" fill="${ink}"/>`;
+  s += `<circle cx="${cx+ex+R*0.012}" cy="${faceY+R*0.022}" r="${pupR}" fill="${ink}"/>`;
+  s += `<circle cx="${cx-ex-R*0.046}" cy="${faceY-R*0.046}" r="${pupR*0.36}" fill="#fff"/>`;
+  s += `<circle cx="${cx+ex-R*0.046}" cy="${faceY-R*0.046}" r="${pupR*0.36}" fill="#fff"/>`;
+  s += `<circle cx="${cx-ex+R*0.060}" cy="${faceY+R*0.080}" r="${pupR*0.20}" fill="#fff" opacity=".9"/>`;
+  s += `<circle cx="${cx+ex+R*0.060}" cy="${faceY+R*0.080}" r="${pupR*0.20}" fill="#fff" opacity=".9"/>`;
+  s += `<path d="M ${cx-R*0.16} ${faceY+R*0.38} Q ${cx} ${faceY+R*0.58} ${cx+R*0.16} ${faceY+R*0.38}"
+        stroke="${ink}" stroke-width="${R*0.06}" stroke-linecap="round" fill="none" opacity=".88"/>`;
+  return s;
+}
+
+function puddingSVG(cfg, S){
+  const R = S*RC, cx = S*0.5, cy = S*CYC;
+  const [light, main, dark] = cfg.c;
+  const ink = '#5d3726';
+
+  const body = `M ${cx-R*0.70} ${cy-R*0.58}
+    C ${cx-R*0.74} ${cy-R*0.84}, ${cx-R*0.58} ${cy-R*0.95}, ${cx} ${cy-R*0.95}
+    C ${cx+R*0.58} ${cy-R*0.95}, ${cx+R*0.74} ${cy-R*0.84}, ${cx+R*0.70} ${cy-R*0.58}
+    C ${cx+R*0.86} ${cy-R*0.20}, ${cx+R*1.05} ${cy+R*0.10}, ${cx+R*1.06} ${cy+R*0.42}
+    C ${cx+R*1.07} ${cy+R*0.78}, ${cx+R*0.62} ${cy+R*0.98}, ${cx} ${cy+R*0.98}
+    C ${cx-R*0.62} ${cy+R*0.98}, ${cx-R*1.07} ${cy+R*0.78}, ${cx-R*1.06} ${cy+R*0.42}
+    C ${cx-R*1.05} ${cy+R*0.10}, ${cx-R*0.86} ${cy-R*0.20}, ${cx-R*0.70} ${cy-R*0.58} Z`;
+
+  // 焦糖淋面（带垂滴）
+  const dy = cy - R*0.30, x1 = cx + R*1.14, span = R*2.28, n = 6, step = span/n;
+  let caramel = `M ${cx-R*1.20} ${cy-R*1.20} L ${cx+R*1.20} ${cy-R*1.20} L ${x1} ${dy}`;
+  for (let i=0;i<n;i++){
+    const xa = x1 - i*step;
+    caramel += ` Q ${xa-step*0.5} ${dy + R*(i%2 ? 0.30 : 0.16)} ${xa-step} ${dy}`;
+  }
+  caramel += ' Z';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+  <defs>
+    <radialGradient id="pb" cx="36%" cy="26%" r="84%">
+      <stop offset="0%" stop-color="${light}"/>
+      <stop offset="52%" stop-color="${main}"/>
+      <stop offset="100%" stop-color="${dark}"/>
+    </radialGradient>
+    <linearGradient id="pc" x1="0.15" y1="0" x2="0.35" y2="1">
+      <stop offset="0%" stop-color="#f7c882"/>
+      <stop offset="42%" stop-color="#dd9a42"/>
+      <stop offset="100%" stop-color="#a6600f"/>
+    </linearGradient>
+    <radialGradient id="ch" cx="34%" cy="28%" r="80%">
+      <stop offset="0%" stop-color="#ff7d84"/><stop offset="100%" stop-color="#b3122a"/>
+    </radialGradient>
+    <radialGradient id="pgl" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff" stop-opacity=".85"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="psh" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#9c5a12" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#9c5a12" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="pclip"><path d="${body}"/></clipPath>
+  </defs>
+
+  <!-- 布丁体 -->
+  <path d="${body}" fill="url(#pb)" stroke="${dark}" stroke-width="${R*0.024}" stroke-opacity=".4"/>
+
+  <g clip-path="url(#pclip)">
+    <path d="${caramel}" fill="url(#pc)"/>
+    <!-- 焦糖光泽 -->
+    <ellipse cx="${cx-R*0.30}" cy="${cy-R*0.68}" rx="${R*0.34}" ry="${R*0.14}" fill="url(#pgl)"
+             transform="rotate(-14 ${cx-R*0.30} ${cy-R*0.68})" opacity=".9"/>
+    <!-- 底部阴影 -->
+    <ellipse cx="${cx}" cy="${cy+R*1.08}" rx="${R*1.10}" ry="${R*0.70}" fill="url(#psh)"/>
+    <!-- 侧面高光 -->
+    <ellipse cx="${cx-R*0.60}" cy="${cy+R*0.34}" rx="${R*0.26}" ry="${R*0.34}" fill="#fff" opacity=".22"
+             transform="rotate(-12 ${cx-R*0.60} ${cy+R*0.34})"/>
+  </g>
+
+  ${faceSVG(cx, cy+R*0.26, R, ink, cfg.blush, 0.40)}
+
+  <!-- 顶上樱桃 -->
+  <path d="M ${cx+R*0.03} ${cy-R*0.99} C ${cx+R*0.08} ${cy-R*1.14}, ${cx+R*0.16} ${cy-R*1.20}, ${cx+R*0.24} ${cy-R*1.23}"
+        stroke="#4f8f3f" stroke-width="${R*0.055}" fill="none" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy-R*1.03}" r="${R*0.155}" fill="url(#ch)"/>
+  <circle cx="${cx-R*0.055}" cy="${cy-R*1.08}" r="${R*0.045}" fill="#fff" opacity=".75"/>
+  </svg>`;
+}
+
+function cakeSVG(cfg, S){
+  const R = S*RC, cx = S*0.5, cy = S*CYC;
+  const [light, main, dark] = cfg.c;
+  const ink = '#5d3726';
+
+  const body = `M ${cx-R*1.00} ${cy+R*0.16}
+    C ${cx-R*1.03} ${cy-R*0.34}, ${cx-R*0.62} ${cy-R*0.80}, ${cx} ${cy-R*0.82}
+    C ${cx+R*0.62} ${cy-R*0.80}, ${cx+R*1.03} ${cy-R*0.34}, ${cx+R*1.00} ${cy+R*0.16}
+    C ${cx+R*0.99} ${cy+R*0.62}, ${cx+R*0.62} ${cy+R*0.97}, ${cx} ${cy+R*0.97}
+    C ${cx-R*0.62} ${cy+R*0.97}, ${cx-R*0.99} ${cy+R*0.62}, ${cx-R*1.00} ${cy+R*0.16} Z`;
+
+  // 顶部奶油（带垂边）
+  const dy = cy - R*0.24, x1 = cx + R*1.06, span = R*2.12, n = 6, step = span/n;
+  let cream = `M ${cx-R*1.10} ${cy-R*1.10} L ${x1} ${cy-R*1.10} L ${x1} ${dy}`;
+  for (let i=0;i<n;i++){
+    const xa = x1 - i*step;
+    cream += ` Q ${xa-step*0.5} ${dy + R*(i%2 ? 0.30 : 0.14)} ${xa-step} ${dy}`;
+  }
+  cream += ' Z';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+  <defs>
+    <radialGradient id="kb" cx="36%" cy="26%" r="84%">
+      <stop offset="0%" stop-color="${light}"/>
+      <stop offset="52%" stop-color="${main}"/>
+      <stop offset="100%" stop-color="${dark}"/>
+    </radialGradient>
+    <linearGradient id="kc" x1="0.2" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#fff6ea"/>
+      <stop offset="100%" stop-color="#f6ddc6"/>
+    </linearGradient>
+    <radialGradient id="kbry" cx="34%" cy="26%" r="82%">
+      <stop offset="0%" stop-color="#ff7a80"/>
+      <stop offset="70%" stop-color="#e8384f"/>
+      <stop offset="100%" stop-color="#a80f28"/>
+    </radialGradient>
+    <radialGradient id="kgl" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff" stop-opacity=".9"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ksh" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a05a30" stop-opacity=".24"/>
+      <stop offset="100%" stop-color="#a05a30" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="kclip"><path d="${body}"/></clipPath>
+  </defs>
+
+  <!-- 蛋糕体 -->
+  <path d="${body}" fill="url(#kb)" stroke="${dark}" stroke-width="${R*0.024}" stroke-opacity=".35"/>
+
+  <g clip-path="url(#kclip)">
+    <path d="${cream}" fill="url(#kc)"/>
+    <!-- 果酱夹层 -->
+    <path d="M ${cx-R*1.1} ${cy-R*0.10} C ${cx-R*0.55} ${cy-R*0.20}, ${cx+R*0.55} ${cy+R*0.02}, ${cx+R*1.1} ${cy-R*0.12}
+             L ${cx+R*1.1} ${cy+R*0.04} C ${cx+R*0.55} ${cy+R*0.18}, ${cx-R*0.55} ${cy-R*0.04}, ${cx-R*1.1} ${cy+R*0.08} Z"
+          fill="#ef6f8f" opacity=".7"/>
+    <!-- 底部阴影 -->
+    <ellipse cx="${cx}" cy="${cy+R*1.08}" rx="${R*1.10}" ry="${R*0.70}" fill="url(#ksh)"/>
+  </g>
+
+  <!-- 顶部草莓 -->
+  <path d="M ${cx} ${cy-R*0.62} C ${cx-R*0.30} ${cy-R*0.74}, ${cx-R*0.28} ${cy-R*1.04}, ${cx} ${cy-R*1.07}
+           C ${cx+R*0.28} ${cy-R*1.04}, ${cx+R*0.30} ${cy-R*0.74}, ${cx} ${cy-R*0.62} Z" fill="url(#kbry)"/>
+  <ellipse cx="${cx-R*0.10}" cy="${cy-R*0.92}" rx="${R*0.05}" ry="${R*0.10}" fill="#fff" opacity=".5" transform="rotate(-16 ${cx-R*0.10} ${cy-R*0.92})"/>
+  <circle cx="${cx-R*0.06}" cy="${cy-R*0.82}" r="${R*0.022}" fill="#fff8d8"/>
+  <circle cx="${cx+R*0.08}" cy="${cy-R*0.78}" r="${R*0.022}" fill="#fff8d8"/>
+  <circle cx="${cx-R*0.02}" cy="${cy-R*0.74}" r="${R*0.022}" fill="#fff8d8"/>
+  <ellipse cx="${cx}" cy="${cy-R*1.06}" rx="${R*0.18}" ry="${R*0.055}" fill="#3fa257"/>
+  <ellipse cx="${cx-R*0.14}" cy="${cy-R*1.04}" rx="${R*0.10}" ry="${R*0.045}" fill="#54b96c" transform="rotate(-22 ${cx-R*0.14} ${cy-R*1.04})"/>
+  <ellipse cx="${cx+R*0.14}" cy="${cy-R*1.04}" rx="${R*0.10}" ry="${R*0.045}" fill="#54b96c" transform="rotate(22 ${cx+R*0.14} ${cy-R*1.04})"/>
+
+  ${faceSVG(cx, cy+R*0.24, R, ink, cfg.blush, 0.40)}
+  </svg>`;
+}
+
+function buildSVG(cfg, S){
+  if (cfg.kind === 'pudding') return puddingSVG(cfg, S);
+  if (cfg.kind === 'cake') return cakeSVG(cfg, S);
+  return appleSVG(cfg, S);
+}
+
+/* =========================================================
    状态
    ========================================================= */
 const cv = document.getElementById('cv');
@@ -496,7 +675,8 @@ function newFruit(x,y,level){
     x, y, r:A.r, level,
     vx:0, vy:0, angle:rnd(-0.18,0.18), av:rnd(-0.5,0.5),
     sq:0, vsq:0, sa:Math.PI/2,
-    age:0, pop:0, over:0
+    age:0, pop:0, over:0,
+    tilt: A.tilt || 0.62
   };
 }
 function squashHit(f, speed, axis){
@@ -523,8 +703,8 @@ function stepPhysics(dt){
     // 旋转：向 0 回正的弹簧（保持脸蛋朝上）
     f.av += (-f.angle*9 - f.av*4.6)*dt;
     f.angle += f.av*dt;
-    if (f.angle > 0.62){ f.angle = 0.62; f.av *= -0.4; }
-    if (f.angle < -0.62){ f.angle = -0.62; f.av *= -0.4; }
+    if (f.angle > f.tilt){ f.angle = f.tilt; f.av *= -0.4; }
+    if (f.angle < -f.tilt){ f.angle = -f.tilt; f.av *= -0.4; }
 
     // 形变弹簧（果冻感）
     f.vsq += (-SQ_K*f.sq - SQ_C*f.vsq)*dt;
@@ -585,6 +765,7 @@ function solveCollisions(dt){
     const a = fs[i];
     if (dead.has(a)) continue;
     for (let j=i+1;j<n;j++){
+      if (dead.has(a)) break;          // a 已在本轮被合成掉，不能再参与其它配对
       const b = fs[j];
       if (dead.has(b)) continue;
 
@@ -650,11 +831,11 @@ function doMerge(a, b){
   const mx = (a.x + b.x)/2, my = (a.y + b.y)/2;
 
   if (lv === APPLES.length - 1){
-    // 两个终极苹果相撞 → 爆开
-    state.score += 300;
-    burst(mx, my, APPLES[lv], 46, 1.5);
-    addText(mx, my - 20, '+300', '#e8402f', 26);
-    state.shake = 16;
+    // 两个奶油蛋糕相撞 → 爆开
+    state.score += 600;
+    burst(mx, my, APPLES[lv], 52, 1.6);
+    addText(mx, my - 20, '+600', '#e8402f', 28);
+    state.shake = 18;
     sfx('big');
     bumpScore();
     return null;
@@ -1086,6 +1267,7 @@ function bumpScore(){
   void elScore.offsetWidth;
   elScore.classList.add('bump');
   setTimeout(()=>elScore.classList.remove('bump'), 190);
+  updateChain();
 }
 
 function buildChain(){
@@ -1093,7 +1275,7 @@ function buildChain(){
   for (let i=0;i<APPLES.length;i++){
     const d = document.createElement('div');
     d.className = 'ph';
-    const s = 13 + i*2.6;
+    const s = 12 + i*2.05;
     d.style.width = s + 'px';
     d.style.height = s + 'px';
     if (URIS[i]){
@@ -1107,6 +1289,15 @@ function buildChain(){
   }
 }
 
+function updateChain(){
+  const kids = elChain.children;
+  for (let i=0;i<kids.length;i++){
+    const on = i <= state.maxLevel;
+    if (on) kids[i].classList.add('on');
+    else kids[i].classList.remove('on');
+  }
+}
+
 function updateHud(){
   elScore.textContent = state.score;
   elBest.textContent = state.best;
@@ -1115,11 +1306,7 @@ function updateHud(){
   }
   elNextName.textContent = APPLES[state.next].name;
   elNextSize.textContent = APPLES[state.next].sub;
-  const kids = elChain.children;
-  for (let i=0;i<kids.length;i++){
-    if (i <= state.maxLevel) kids[i].classList.add('on');
-    else kids[i].classList.remove('on');
-  }
+  updateChain();
 }
 
 /* =========================================================
@@ -1177,7 +1364,7 @@ btnSound.addEventListener('click', ()=>{
    ========================================================= */
 function loadSprites(){
   const jobs = APPLES.map((cfg, i)=> new Promise(res=>{
-    const svg = appleSVG(cfg, SPR);
+    const svg = buildSVG(cfg, SPR);
     const uri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     URIS[i] = uri;
     const img = new Image();
